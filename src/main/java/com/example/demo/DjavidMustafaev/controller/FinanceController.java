@@ -2,8 +2,9 @@ package com.example.demo.DjavidMustafaev.controller;
 
 import com.example.demo.DjavidMustafaev.dto.ExpenseDto;
 import com.example.demo.DjavidMustafaev.dto.IncomeDto;
-import com.example.demo.DjavidMustafaev.service.FinanceService;
+import com.example.demo.DjavidMustafaev.service.FinanceFacade;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,19 +21,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/dashboard")
+@RequiredArgsConstructor
 public class FinanceController {
 
-    final private FinanceService financeService;
-
-    @Autowired
-    public FinanceController(FinanceService financeService) {
-        this.financeService = financeService;
-    }
+    final private FinanceFacade financeFacade;
 
     @GetMapping("/totals")
     public ResponseEntity<?> getTotalIncomeAndExpense() {
-        BigDecimal totalIncome = financeService.calculateTotalIncome();
-        BigDecimal totalExpense = financeService.calculateTotalExpenses();
+        BigDecimal totalIncome = financeFacade.totalIncome();
+        BigDecimal totalExpense = financeFacade.totalExpenses();
         return ResponseEntity.ok(new Object() {
             public final BigDecimal Income = totalIncome;
             public final BigDecimal Expense = totalExpense;
@@ -41,40 +38,40 @@ public class FinanceController {
 
     @GetMapping("/incomes")
     public List<IncomeDto> getIncomes() {
-        return financeService.getAllIncome();
+        return financeFacade.listIncome();
     }
 
     @GetMapping("/expenses")
     public List<ExpenseDto> getExpense() {
-        return financeService.getAllExpense();
+        return financeFacade.listExpenses();
     }
 
     @PostMapping("/addIncome")
     public ResponseEntity<String> addIncome(@Valid @RequestBody IncomeDto incomeDto) {
-        financeService.saveIncome(incomeDto);
+        financeFacade.addIncome(incomeDto);
         return ResponseEntity.status(201).body("Доход успешно добавлен");
     }
 
     @PostMapping("/addExpense")
     public ResponseEntity<String> addExpense(@Valid @RequestBody ExpenseDto expenseDto) {
-        financeService.saveExpense(expenseDto);
+        financeFacade.addExpense(expenseDto);
         return ResponseEntity.status(201).body("Расход успешно добавлен");
     }
 
     @DeleteMapping("/delete/all")
     public ResponseEntity<String> deleteAll() {
-        financeService.deleteAll();
+        financeFacade.deleteAll();
         return ResponseEntity.ok("Все успешно удалилось");
     }
 
     @DeleteMapping("/incomes/{id}")
     public ResponseEntity<HttpStatus> deleteIncomeOperation(@PathVariable ("id") Long id) {
-        financeService.deleteIncomeOperation(id);
+        financeFacade.deleteIncome(id);
         return ResponseEntity.ok(HttpStatus.OK);
     }
     @DeleteMapping("/expenses/{id}")
     public ResponseEntity<HttpStatus> deleteExpenseOperation(@PathVariable ("id") Long id) {
-        financeService.deleteExpenseOperation(id);
+        financeFacade.deleteExpense(id);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
