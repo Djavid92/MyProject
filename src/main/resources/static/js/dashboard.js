@@ -120,8 +120,19 @@ function updateCharts(incomesData, expensesData) {
 }
 
 // Создание графика по категориям
+// Хранилище инстансов графиков по id canvas
+const charts = {};
+
+// Создание/пересоздание графика по категориям
 function createCategoryChart(canvasId, data, title) {
-    const ctx = document.getElementById(canvasId).getContext('2d');
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    // если график уже был — уничтожаем, чтобы освободить canvas
+    if (charts[canvasId]) {
+        charts[canvasId].destroy();
+        charts[canvasId] = null;
+    }
 
     // Группировка по категориям
     const categories = {};
@@ -130,30 +141,34 @@ function createCategoryChart(canvasId, data, title) {
         categories[category] = (categories[category] || 0) + parseFloat(item.amount);
     });
 
-    new Chart(ctx, {
+    const labels = Object.keys(categories);
+    const values = Object.values(categories);
+
+    // Если данных нет — просто выходим (canvas останется пустым)
+    if (values.length === 0) return;
+
+    charts[canvasId] = new Chart(canvas, {
         type: 'pie',
         data: {
-            labels: Object.keys(categories),
+            labels,
             datasets: [{
-                data: Object.values(categories),
+                data: values,
                 backgroundColor: [
                     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-                    '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+                    '#9966FF', '#FF9F40', '#C9CBCF', '#8BC34A',
+                    '#00BCD4', '#FFC107', '#9C27B0', '#607D8B'
                 ]
             }]
         },
         options: {
             responsive: true,
             plugins: {
-                title: {
-                    display: true,
-                    text: title
-                },
+                title: { display: true, text: title },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            const value = context.raw;
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const value = Number(context.raw) || 0;
+                            const total = context.dataset.data.reduce((a, b) => Number(a) + Number(b), 0) || 1;
                             const percentage = ((value / total) * 100).toFixed(1);
                             return `${context.label}: ${formatCurrency(value)} (${percentage}%)`;
                         }
@@ -183,16 +198,72 @@ function openTab(tabName) {
     event.currentTarget.classList.add('active');
 }
 
-// Функции удаления (заглушки - нужно реализовать на бэкенде)
-function deleteIncome(id) {
-    if (confirm('Удалить этот доход?')) {
-        alert('Функция удаления будет реализована в следующей версии');
+// --- Удаление дохода ---
+async function deleteIncome(id) {
+    if (!confirm('Удалить этот доход?')) return;
+
+    // если нужен CSRF-токен, положи его в <meta name="csrf-token" content="...">
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+    // найдём кнопку и временно заблокируем
+    const btn = document.querySelector(`#incomes-table button[onclick="deleteIncome(${id})"]`);
+    if (btn) { btn.disabled = true; btn.textContent = 'Удаление...'; }
+
+    try {
+        const res = await fetch(`${API_BASE}/incomes/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                ...(csrf ? { 'X-CSRF-TOKEN': csrf } : {})
+            }
+        });
+
+        if (!res.ok) {
+            // попробуем достать текст ошибки с бэка
+            let msg = 'Не удалось удалить доход';
+            try { msg = (await res.json())?.message || msg; } catch (_) {}
+            throw new Error(msg);
+        }
+
+        // локально удаляем запись и обновляем UI
+        incomes = incomes.filter(i => i.id !== id);
+        applyFilters();
+    } catch (err) {
+        console.error(err);
+        alert(err.message || 'Ошибка при удалении дохода');
+        if (btn) { btn.disabled = false; btn.textContent = 'Удалить'; }
     }
 }
 
-function deleteExpense(id) {
-    if (confirm('Удалить этот расход?')) {
-        alert('Функция удаления будет реализована в следующей версии');
+// --- Удаление расхода ---
+async function deleteExpense(id) {
+    if (!confirm('Удалить этот расход?')) return;
+
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    const btn = document.querySelector(`#expenses-table button[onclick="deleteExpense(${id})"]`);
+    if (btn) { btn.disabled = true; btn.textContent = 'Удаление...'; }
+
+    try {
+        const res = await fetch(`${API_BASE}/expenses/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                ...(csrf ? { 'X-CSRF-TOKEN': csrf } : {})
+            }
+        });
+
+        if (!res.ok) {
+            let msg = 'Не удалось удалить расход';
+            try { msg = (await res.json())?.message || msg; } catch (_) {}
+            throw new Error(msg);
+        }
+
+        expenses = expenses.filter(e => e.id !== id);
+        applyFilters();
+    } catch (err) {
+        console.error(err);
+        alert(err.message || 'Ошибка при удалении расхода');
+        if (btn) { btn.disabled = false; btn.textContent = 'Удалить'; }
     }
 }
 

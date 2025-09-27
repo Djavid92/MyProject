@@ -5,21 +5,18 @@ import com.example.demo.DjavidMustafaev.dto.IncomeDto;
 import com.example.demo.DjavidMustafaev.service.FinanceService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -53,21 +50,32 @@ public class FinanceController {
     }
 
     @PostMapping("/addIncome")
-    public ResponseEntity<?> addIncome(@Valid @RequestBody IncomeDto incomeDto) {
+    public ResponseEntity<String> addIncome(@Valid @RequestBody IncomeDto incomeDto) {
         financeService.saveIncome(incomeDto);
         return ResponseEntity.status(201).body("Доход успешно добавлен");
     }
 
     @PostMapping("/addExpense")
-    public ResponseEntity<?> addExpense(@Valid @RequestBody ExpenseDto expenseDto) {
+    public ResponseEntity<String> addExpense(@Valid @RequestBody ExpenseDto expenseDto) {
         financeService.saveExpense(expenseDto);
         return ResponseEntity.status(201).body("Расход успешно добавлен");
     }
 
     @DeleteMapping("/delete/all")
-    public ResponseEntity<?> deleteAll() {
+    public ResponseEntity<String> deleteAll() {
         financeService.deleteAll();
         return ResponseEntity.ok("Все успешно удалилось");
+    }
+
+    @DeleteMapping("/incomes/{id}")
+    public ResponseEntity<HttpStatus> deleteIncomeOperation(@PathVariable ("id") Long id) {
+        financeService.deleteIncomeOperation(id);
+        return ResponseEntity.ok(HttpStatus.OK);
+    }
+    @DeleteMapping("/expenses/{id}")
+    public ResponseEntity<HttpStatus> deleteExpenseOperation(@PathVariable ("id") Long id) {
+        financeService.deleteExpenseOperation(id);
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
 //    @GetMapping("/test/exception")

@@ -18,13 +18,15 @@
 
     <!-- Фильтры -->
     <section class="filters-section">
-        <div class="filter-group">
-            <label for="date-from">С:</label>
-            <input type="date" id="date-from">
-        </div>
-        <div class="filter-group">
-            <label for="date-to">По:</label>
-            <input type="date" id="date-to">
+        <div class="filters-row">
+            <div class="filter-group">
+                <label for="date-from">С:</label>
+                <input type="date" id="date-from">
+            </div>
+            <div class="filter-group">
+                <label for="date-to">По:</label>
+                <input type="date" id="date-to">
+            </div>
         </div>
         <button class="btn btn-primary" onclick="applyFilters()">Применить фильтры</button>
         <button class="btn btn-secondary" onclick="resetFilters()">Сбросить</button>

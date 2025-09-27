@@ -2,18 +2,13 @@ package com.example.demo.DjavidMustafaev.service;
 
 import com.example.demo.DjavidMustafaev.dto.ExpenseDto;
 import com.example.demo.DjavidMustafaev.dto.IncomeDto;
-import com.example.demo.DjavidMustafaev.handler.BusinessException;
 import com.example.demo.DjavidMustafaev.mapper.IncomeExpenseMapper;
 import com.example.demo.DjavidMustafaev.model.Expense;
 import com.example.demo.DjavidMustafaev.model.Income;
 import com.example.demo.DjavidMustafaev.repositories.ExpenseRepository;
 import com.example.demo.DjavidMustafaev.repositories.IncomeRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.MappingException;
-import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,6 +77,16 @@ public class FinanceService {
     public void deleteAll() {
         incomeRepository.deleteAll();
         expenseRepository.deleteAll();
+    }
+
+    @Transactional
+    public void deleteIncomeOperation(Long id) {
+        incomeRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteExpenseOperation(Long id) {
+        expenseRepository.deleteById(id);
     }
 
 //    @Transactional
