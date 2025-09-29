@@ -20,6 +20,7 @@ public class ExpenseQueryService {
     List<ExpenseDto> list() {
         return expenseRepository.findAll().stream().map(incomeExpenseMapper::toExpenseDto).toList();
     }
+
     BigDecimal total() {
         return expenseRepository.sumAmount();
     }

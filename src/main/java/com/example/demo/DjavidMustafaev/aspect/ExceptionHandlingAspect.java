@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 @Component
 @Slf4j
 public class ExceptionHandlingAspect {
-    @Around("execution(* com.example.demo.DjavidMustafaev.service.FinanceService.*(..))")
+    @Around("execution(* com.example.demo.DjavidMustafaev.service.FinanceFacade.*(..))")
     public Object handleException(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().toShortString();
         Object[] args = joinPoint.getArgs();
@@ -26,6 +26,9 @@ public class ExceptionHandlingAspect {
             Object result = joinPoint.proceed();
             log.info("Метод {} успешно выполнился", methodName);
             return result;
+        } catch (IllegalArgumentException e) {
+            log.error("Ошибка при добавлении транзакции в методе {}", methodName);
+            throw new BusinessException("Ошибка сохранения: неправильная дата добавления");
 
         } catch (DataIntegrityViolationException e) {
             log.error("Ошибка целостности данных в методе {} с аргументами: {}", methodName, args, e);

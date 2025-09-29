@@ -2,11 +2,15 @@ package com.example.demo.DjavidMustafaev.service;
 
 import com.example.demo.DjavidMustafaev.dto.ExpenseDto;
 import com.example.demo.DjavidMustafaev.mapper.IncomeExpenseMapper;
+import com.example.demo.DjavidMustafaev.model.Expense;
 import com.example.demo.DjavidMustafaev.repositories.ExpenseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,13 +22,21 @@ public class ExpenseCommandService {
 
 
     void save(ExpenseDto dto) {
+        LocalDate today = LocalDate.now();
+        if (dto.getDate().isAfter(today)) {
+            throw new  IllegalArgumentException("Нельзя записывать транзакцию на будущее");
+        }
         expenseRepository.save(incomeExpenseMapper.toExpenseEntity(dto));
         log.info("Расход сохранён: {}", dto);
     }
+
     boolean delete(Long id) {
-        if (!expenseRepository.existsById(id)) return false;
-        expenseRepository.deleteById(id);
-        return true;
+        Optional<Expense> expenseOptional = expenseRepository.findById(id);
+        expenseOptional.ifPresent(exp -> expenseRepository.deleteById(id));
+        return expenseOptional.isPresent();
     }
-    void deleteAll() { expenseRepository.deleteAll(); }
+
+    void deleteAll() {
+        expenseRepository.deleteAll();
+    }
 }
