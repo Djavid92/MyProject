@@ -1,4 +1,4 @@
-package com.example.demo.DjavidMustafaev.service;
+package com.example.demo.DjavidMustafaev.service.serviceExpense;
 
 import com.example.demo.DjavidMustafaev.dto.ExpenseDto;
 import com.example.demo.DjavidMustafaev.mapper.IncomeExpenseMapper;
@@ -21,7 +21,7 @@ public class ExpenseCommandService {
     private final IncomeExpenseMapper incomeExpenseMapper;
 
 
-    void save(ExpenseDto dto) {
+    public void save(ExpenseDto dto) {
         LocalDate today = LocalDate.now();
         if (dto.getDate().isAfter(today)) {
             throw new  IllegalArgumentException("Нельзя записывать транзакцию на будущее");
@@ -30,13 +30,13 @@ public class ExpenseCommandService {
         log.info("Расход сохранён: {}", dto);
     }
 
-    boolean delete(Long id) {
+    public boolean delete(Long id) {
         Optional<Expense> expenseOptional = expenseRepository.findById(id);
         expenseOptional.ifPresent(exp -> expenseRepository.deleteById(id));
         return expenseOptional.isPresent();
     }
 
-    void deleteAll() {
+    public void deleteAll() {
         expenseRepository.deleteAll();
     }
 }

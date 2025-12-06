@@ -1,4 +1,4 @@
-package com.example.demo.DjavidMustafaev.service;
+package com.example.demo.DjavidMustafaev.service.serviceIncome;
 
 import com.example.demo.DjavidMustafaev.dto.IncomeDto;
 import com.example.demo.DjavidMustafaev.mapper.IncomeExpenseMapper;
@@ -20,7 +20,7 @@ public class IncomeCommandService {
     private final IncomeRepository incomeRepository;
     private final IncomeExpenseMapper incomeExpenseMapper;
 
-    void save(IncomeDto dto) {
+    public void save(IncomeDto dto) {
         LocalDate today = LocalDate.now();
         if (dto.getDate().isAfter(today)) {
             throw new IllegalArgumentException("Нельзя записывать транзакцию на будущее");
@@ -28,10 +28,10 @@ public class IncomeCommandService {
         incomeRepository.save(incomeExpenseMapper.toIncomeEntity(dto));
         log.info("Доход сохранён: {}", dto);
     }
-    boolean delete(Long id) {
+    public boolean delete(Long id) {
         Optional<Income> incomeOptional = incomeRepository.findById(id);
         incomeOptional.ifPresent(inc -> incomeRepository.deleteById(id));
         return incomeOptional.isPresent();
     }
-    void deleteAll() { incomeRepository.deleteAll(); }
+    public void deleteAll() { incomeRepository.deleteAll(); }
 }

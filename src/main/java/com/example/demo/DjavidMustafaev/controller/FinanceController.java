@@ -2,10 +2,10 @@ package com.example.demo.DjavidMustafaev.controller;
 
 import com.example.demo.DjavidMustafaev.dto.ExpenseDto;
 import com.example.demo.DjavidMustafaev.dto.IncomeDto;
-import com.example.demo.DjavidMustafaev.service.FinanceFacade;
+import com.example.demo.DjavidMustafaev.service.serviceExpense.FinanceFacadeExpense;
+import com.example.demo.DjavidMustafaev.service.serviceIncome.FinanceFacadeIncome;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,12 +23,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FinanceController {
 
-    final private FinanceFacade financeFacade;
+    private final FinanceFacadeIncome financeFacadeIncome;
+    private final FinanceFacadeExpense financeFacadeExpense;
+
 
     @GetMapping("/totals")
     public ResponseEntity<?> getTotalIncomeAndExpense() {
-        BigDecimal totalIncome = financeFacade.totalIncome();
-        BigDecimal totalExpense = financeFacade.totalExpenses();
+        BigDecimal totalIncome = financeFacadeIncome.totalIncomeForCurrentMonth();
+        BigDecimal totalExpense = financeFacadeExpense.totalExpenseForCurrentMonth();
         return ResponseEntity.ok(new Object() {
             public final BigDecimal Income = totalIncome;
             public final BigDecimal Expense = totalExpense;
@@ -37,41 +39,51 @@ public class FinanceController {
 
     @GetMapping("/incomes")
     public List<IncomeDto> getIncomes() {
-        return financeFacade.listIncome();
+        return financeFacadeIncome.listIncome();
     }
 
     @GetMapping("/expenses")
     public List<ExpenseDto> getExpense() {
-        return financeFacade.listExpenses();
+        return financeFacadeExpense.listExpenses();
     }
 
     @PostMapping("/addIncome")
     public ResponseEntity<String> addIncome(@Valid @RequestBody IncomeDto incomeDto) {
-        financeFacade.addIncome(incomeDto);
+        financeFacadeIncome.addIncome(incomeDto);
         return ResponseEntity.status(201).body("Доход успешно добавлен");
     }
 
     @PostMapping("/addExpense")
     public ResponseEntity<String> addExpense(@Valid @RequestBody ExpenseDto expenseDto) {
-        financeFacade.addExpense(expenseDto);
+        financeFacadeExpense.addExpense(expenseDto);
         return ResponseEntity.status(201).body("Расход успешно добавлен");
     }
 
     @DeleteMapping("/delete/all")
     public ResponseEntity<String> deleteAll() {
-        financeFacade.deleteAll();
+        financeFacadeIncome.deleteAll();
+        financeFacadeExpense.deleteAll();
         return ResponseEntity.ok("Все успешно удалилось");
     }
 
     @DeleteMapping("/incomes/{id}")
-    public ResponseEntity<HttpStatus> deleteIncomeOperation(@PathVariable ("id") Long id) {
-        financeFacade.deleteIncome(id);
-        return ResponseEntity.ok(HttpStatus.OK);
+    public ResponseEntity<Void> deleteIncomeOperation(@PathVariable ("id") Long id) {
+        boolean deleted = financeFacadeIncome.deleteIncome(id);
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
+
     @DeleteMapping("/expenses/{id}")
-    public ResponseEntity<HttpStatus> deleteExpenseOperation(@PathVariable ("id") Long id) {
-        financeFacade.deleteExpense(id);
-        return ResponseEntity.ok(HttpStatus.OK);
+    public ResponseEntity<Void> deleteExpenseOperation(@PathVariable ("id") Long id) {
+        boolean deleted = financeFacadeExpense.deleteExpense(id);
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
 //    @GetMapping("/test/exception")

@@ -100,7 +100,23 @@ async function loadChartData() {
             fetch(`${API_BASE}/expenses`).then(r => r.json())
         ]);
 
-        createMainChart(incomes, expenses);
+        // Получаем текущий месяц
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+
+        // Фильтруем данные за текущий месяц
+        const filteredIncomes = incomes.filter(income => {
+            const incomeDate = new Date(income.date);
+            return incomeDate.getMonth() === currentMonth && incomeDate.getFullYear() === currentYear;
+        });
+
+        const filteredExpenses = expenses.filter(expense => {
+            const expenseDate = new Date(expense.date);
+            return expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear;
+        });
+
+
+        createMainChart(filteredIncomes, filteredExpenses);
     } catch (error) {
         console.error('Ошибка загрузки данных для графика:', error);
         throw error;

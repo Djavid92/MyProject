@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 @Component
 @Slf4j
 public class ExceptionHandlingAspect {
-    @Around("execution(* com.example.demo.DjavidMustafaev.service.FinanceFacade.*(..))")
+    @Around("execution(* com.example.demo.DjavidMustafaev.service..*(..))")
     public Object handleException(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().toShortString();
         Object[] args = joinPoint.getArgs();
