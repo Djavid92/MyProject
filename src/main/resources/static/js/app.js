@@ -35,9 +35,12 @@ async function loadTotals() {
 
         const data = await response.json();
 
-        document.getElementById('total-income').textContent = formatCurrency(data.Income);
-        document.getElementById('total-expense').textContent = formatCurrency(data.Expense);
-        document.getElementById('balance').textContent = formatCurrency(data.Income - data.Expense);
+        const totalIncome = parseFloat(data.income) || 0;  // Преобразуем в число и устанавливаем 0 по умолчанию
+        const totalExpense = parseFloat(data.expense) || 0;
+
+        document.getElementById('total-income').textContent = formatCurrency(totalIncome);
+        document.getElementById('total-expense').textContent = formatCurrency(totalExpense);
+        document.getElementById('balance').textContent = formatCurrency(totalIncome - totalExpense);
 
         // Цвет баланса в зависимости от значения
         const balanceElement = document.getElementById('balance');
@@ -296,6 +299,7 @@ async function deleteAllData() {
 function loadDetailedView() {
     window.location.href = 'dashboard.html';
 }
+
 
 // Показать уведомление
 function showNotification(message, type = 'info') {

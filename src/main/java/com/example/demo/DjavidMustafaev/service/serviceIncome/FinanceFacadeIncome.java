@@ -19,19 +19,14 @@ public class FinanceFacadeIncome {
         return incomeQuery.list();
     }
 
-    // сумма полного дохода
-    public BigDecimal totalIncome() {
-        return incomeQuery.total();
-    }
-
     // сумма дохода за текущий месяц
     public BigDecimal totalIncomeForCurrentMonth() {
-        return incomeQuery.totalIncomeForCurrentMonth();
+        return incomeQuery.totalForCurrentMonth();
     }
 
-    // сумма дохода за выбранный месяц
-    public BigDecimal totalIncomeFor(int year, int month) {
-        return incomeQuery.totalForYearMonth(year, month);
+    // сумма дохода за прошлый месяц
+    public BigDecimal totalIncomeForPreviousMonth() {
+        return incomeQuery.totalForPreviousMonth();
     }
 
     // добавить доход

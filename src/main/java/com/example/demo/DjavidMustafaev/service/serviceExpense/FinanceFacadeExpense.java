@@ -19,19 +19,14 @@ public class FinanceFacadeExpense {
         return expenseQuery.list();
     }
 
-    // сумма полного расхода
-    public BigDecimal totalExpenses() {
-        return expenseQuery.total();
-    }
-
-    // сумма дохода за текущий месяц
+    // сумма расхода за текущий месяц
     public BigDecimal totalExpenseForCurrentMonth() {
-        return expenseQuery.totalExpenseForCurrentMonth();
+        return expenseQuery.totalForCurrentMonth();
     }
 
-    // сумма дохода за выбранный месяц
-    public BigDecimal totalExpenseFor(int year, int month) {
-        return expenseQuery.totalForYearMonth(year, month);
+    // сумма расхода за прошлый месяц
+    public BigDecimal totalExpenseForPreviousMonth() {
+        return expenseQuery.totalForPreviousMonth();
     }
 
     // добавить расход

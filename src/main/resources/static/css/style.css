@@ -76,7 +76,7 @@ h1 {
 
 .btn-primary { background: #3498db; color: white; }
 .btn-secondary { background: #95a5a6; color: white; }
-.btn-success { background: #27ae60; color: white; }
+.btn-success { background: #27ae60; color: white; float: right }
 .btn-danger { background: #e74c3c; color: white; }
 .btn-info { background: #9b59b6; color: white; }
 .btn-cancel { background: #bdc3c7; color: #333; }

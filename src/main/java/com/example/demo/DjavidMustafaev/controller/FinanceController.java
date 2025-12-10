@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -26,15 +28,26 @@ public class FinanceController {
     private final FinanceFacadeIncome financeFacadeIncome;
     private final FinanceFacadeExpense financeFacadeExpense;
 
-
     @GetMapping("/totals")
-    public ResponseEntity<?> getTotalIncomeAndExpense() {
+    public ResponseEntity<Map<String, BigDecimal>> getTotalIncomeAndExpense() {
         BigDecimal totalIncome = financeFacadeIncome.totalIncomeForCurrentMonth();
         BigDecimal totalExpense = financeFacadeExpense.totalExpenseForCurrentMonth();
-        return ResponseEntity.ok(new Object() {
-            public final BigDecimal Income = totalIncome;
-            public final BigDecimal Expense = totalExpense;
-        });
+
+        Map<String, BigDecimal> response = new HashMap<>();
+        response.put("income", totalIncome);
+        response.put("expense", totalExpense);
+        return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping("/balance")
+    public ResponseEntity<Map<String, BigDecimal>> getIncomeAndExpenseForPreviousMonth() {
+        BigDecimal totalIncomeForPreviousMonth = financeFacadeIncome.totalIncomeForPreviousMonth();
+        BigDecimal totalExpenseForPreviousMonth = financeFacadeExpense.totalExpenseForPreviousMonth();
+
+        Map <String, BigDecimal> response = new HashMap<>();
+        response.put("previousIncome", totalIncomeForPreviousMonth);
+        response.put("previousExpense", totalExpenseForPreviousMonth);
+        return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("/incomes")

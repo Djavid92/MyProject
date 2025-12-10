@@ -63,6 +63,11 @@ function resetFilters() {
     applyFilters();
 }
 
+// переход на детальную информацию прошлого месяца
+function loadPreviousDetailedView() {
+    window.location.href = 'previousInfo.html';
+}
+
 // Отображение таблицы доходов
 function displayIncomesTable(incomesData) {
     const tbody = document.querySelector('#incomes-table tbody');

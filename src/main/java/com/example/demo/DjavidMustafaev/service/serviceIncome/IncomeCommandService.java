@@ -4,6 +4,7 @@ import com.example.demo.DjavidMustafaev.dto.IncomeDto;
 import com.example.demo.DjavidMustafaev.mapper.IncomeExpenseMapper;
 import com.example.demo.DjavidMustafaev.model.Income;
 import com.example.demo.DjavidMustafaev.repositories.IncomeRepository;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ public class IncomeCommandService {
     private final IncomeRepository incomeRepository;
     private final IncomeExpenseMapper incomeExpenseMapper;
 
-    public void save(IncomeDto dto) {
+    public void save(@NotNull IncomeDto dto) {
         LocalDate today = LocalDate.now();
         if (dto.getDate().isAfter(today)) {
             throw new IllegalArgumentException("Нельзя записывать транзакцию на будущее");
