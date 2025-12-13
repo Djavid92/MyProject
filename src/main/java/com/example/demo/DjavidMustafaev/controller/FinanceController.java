@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,13 +53,15 @@ public class FinanceController {
     }
 
     @GetMapping("/incomes")
-    public List<IncomeDto> getIncomes() {
-        return financeFacadeIncome.listIncome();
+    public List<IncomeDto> getIncomes(@RequestParam(value = "startDate", required = false)LocalDate startDate,
+                                      @RequestParam(value = "endDate", required = false)LocalDate endDate) {
+        return financeFacadeIncome.listIncome(startDate, endDate);
     }
 
     @GetMapping("/expenses")
-    public List<ExpenseDto> getExpense() {
-        return financeFacadeExpense.listExpenses();
+    public List<ExpenseDto> getExpense(@RequestParam(value = "startDate", required = false)LocalDate startDate,
+                                       @RequestParam(value = "endDate", required = false)LocalDate endDate) {
+        return financeFacadeExpense.listExpenses(startDate, endDate);
     }
 
     @PostMapping("/addIncome")

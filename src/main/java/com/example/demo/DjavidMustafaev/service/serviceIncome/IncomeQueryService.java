@@ -2,10 +2,12 @@ package com.example.demo.DjavidMustafaev.service.serviceIncome;
 
 import com.example.demo.DjavidMustafaev.dto.IncomeDto;
 import com.example.demo.DjavidMustafaev.mapper.IncomeExpenseMapper;
+import com.example.demo.DjavidMustafaev.model.Income;
 import com.example.demo.DjavidMustafaev.repositories.IncomeRepository;
 import com.example.demo.DjavidMustafaev.service.MonthlyTotalCalculator;
 import com.example.demo.DjavidMustafaev.util.Util;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,8 +23,10 @@ public class IncomeQueryService implements MonthlyTotalCalculator {
     private final IncomeExpenseMapper incomeExpenseMapper;
     private final Util util;
 
-    public List<IncomeDto> list() {
-        return incomeRepository.findAll().stream().map(incomeExpenseMapper::toIncomeDto).toList();
+    public List<IncomeDto> list(LocalDate startDate, LocalDate endDate) {
+        return incomeRepository.findIncomesByDateRange(startDate, endDate).stream()
+                .map(incomeExpenseMapper::toIncomeDto).toList();
+
     }
 
     // сумма за конкретный месяц

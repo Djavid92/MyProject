@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -15,8 +16,8 @@ public class FinanceFacadeExpense {
     private final ExpenseQueryService expenseQuery;
 
     // лист расхода полностью
-    public List<ExpenseDto> listExpenses() {
-        return expenseQuery.list();
+    public List<ExpenseDto> listExpenses(LocalDate startDate, LocalDate endDate) {
+        return expenseQuery.list(startDate, endDate);
     }
 
     // сумма расхода за текущий месяц

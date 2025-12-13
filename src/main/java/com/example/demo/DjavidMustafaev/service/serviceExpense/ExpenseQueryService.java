@@ -22,8 +22,9 @@ public class ExpenseQueryService implements MonthlyTotalCalculator {
     private final Util util;
 
 
-    public List<ExpenseDto> list() {
-        return expenseRepository.findAll().stream().map(incomeExpenseMapper::toExpenseDto).toList();
+    public List<ExpenseDto> list(LocalDate startDate, LocalDate endDate) {
+        return expenseRepository.findExpenseByDateRange(startDate, endDate).stream()
+                .map(incomeExpenseMapper::toExpenseDto).toList();
     }
 
     // сумма за конкретный месяц

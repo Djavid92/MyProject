@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -15,8 +16,8 @@ public class FinanceFacadeIncome {
     private final IncomeQueryService incomeQuery;
 
     // лист дохода полностью
-    public List<IncomeDto> listIncome() {
-        return incomeQuery.list();
+    public List<IncomeDto> listIncome(LocalDate startDate, LocalDate endDate) {
+        return incomeQuery.list(startDate, endDate);
     }
 
     // сумма дохода за текущий месяц
