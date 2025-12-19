@@ -1,9 +1,12 @@
 package com.example.demo.DjavidMustafaev.controller;
 
+import com.example.demo.DjavidMustafaev.dto.CategoryDto;
 import com.example.demo.DjavidMustafaev.dto.ExpenseDto;
 import com.example.demo.DjavidMustafaev.dto.IncomeDto;
+import com.example.demo.DjavidMustafaev.service.serviceCategory.CategoryService;
 import com.example.demo.DjavidMustafaev.service.serviceExpense.FinanceFacadeExpense;
 import com.example.demo.DjavidMustafaev.service.serviceIncome.FinanceFacadeIncome;
+import com.example.demo.DjavidMustafaev.util.Util;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +32,10 @@ public class FinanceController {
 
     private final FinanceFacadeIncome financeFacadeIncome;
     private final FinanceFacadeExpense financeFacadeExpense;
+    private final CategoryService categoryService;
+    private final Util util;
+
+
 
     @GetMapping("/totals")
     public ResponseEntity<Map<String, BigDecimal>> getTotalIncomeAndExpense() {
@@ -39,6 +46,30 @@ public class FinanceController {
         response.put("income", totalIncome);
         response.put("expense", totalExpense);
         return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping("/totals/by-month")
+    public ResponseEntity<Map<String, BigDecimal>> getTotalsByMonth(@RequestParam("year") int year,
+                                                                    @RequestParam("month") int month) {
+        Map<String,BigDecimal> response = new HashMap<>();
+        response.put("income", financeFacadeIncome.totalIncomesFor(year, month));
+        response.put("expense", financeFacadeExpense.totalExpensesFor(year, month));
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/operations/by-month")
+    public ResponseEntity<Map<String, Object>> getOperationByMonth(@RequestParam("year") int year,
+                                                                   @RequestParam("month") int month){
+        Map<String, LocalDate> mapDate = util.getStartAndEndDate(year, month);
+        List<IncomeDto> incomes = financeFacadeIncome.listIncome(mapDate.get("startDate"), mapDate.get("endDate"));
+        List<ExpenseDto> expenses = financeFacadeExpense.listExpenses(mapDate.get("startDate"), mapDate.get("endDate"));
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("incomes", incomes);
+        response.put("expenses", expenses);
+        response.put("startDate", mapDate.get("startDate").toString());
+        response.put("endDate", mapDate.get("endDate").toString());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/balance")
@@ -103,15 +134,25 @@ public class FinanceController {
         }
     }
 
-//    @GetMapping("/test/exception")
-//    public ResponseEntity<String> testException() {
-//        financeService.testException();
-//        return ResponseEntity.ok("Тест завершен");
-//    }
-//
-//    @GetMapping("/test/nullpointer")
-//    public ResponseEntity<String> testNullPointer() {
-//        financeService.testNullPointer();
-//        return ResponseEntity.ok("Тест завершен");
-//    }
+    @PostMapping("/addCategory")
+    public ResponseEntity<String> createCategory(@Valid @RequestBody CategoryDto categoryDto) {
+        categoryService.create(categoryDto);
+        return ResponseEntity.status(201).body("Категория успешно добавлена");
+    }
+
+    @GetMapping("/categories")
+    public List<CategoryDto> listCategories() {
+        return categoryService.getAll();
+    }
+
+    @DeleteMapping("/category/{id}")
+    public ResponseEntity<Void> deleteCategory(@PathVariable("id") Long id) {
+        boolean deleted = categoryService.delete(id);
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

@@ -2,12 +2,10 @@ package com.example.demo.DjavidMustafaev.service.serviceIncome;
 
 import com.example.demo.DjavidMustafaev.dto.IncomeDto;
 import com.example.demo.DjavidMustafaev.mapper.IncomeExpenseMapper;
-import com.example.demo.DjavidMustafaev.model.Income;
 import com.example.demo.DjavidMustafaev.repositories.IncomeRepository;
 import com.example.demo.DjavidMustafaev.service.MonthlyTotalCalculator;
 import com.example.demo.DjavidMustafaev.util.Util;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,9 +30,8 @@ public class IncomeQueryService implements MonthlyTotalCalculator {
     // сумма за конкретный месяц
     @Override
     public BigDecimal totalForYearMonth(int year, int month) {
-        LocalDate start = LocalDate.of(year, month, 1);
-        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
-        return incomeRepository.sumAmountBetween(start, end);
+        return incomeRepository.sumAmountBetween(util.getStartAndEndDate(year, month).get("startDate"),
+                util.getStartAndEndDate(year, month).get("endDate"));
     }
 
     // сумма для текущего месяца

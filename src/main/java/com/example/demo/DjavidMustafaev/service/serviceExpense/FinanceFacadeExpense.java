@@ -20,6 +20,11 @@ public class FinanceFacadeExpense {
         return expenseQuery.list(startDate, endDate);
     }
 
+    // сумма расхода за произвольный месяц
+    public BigDecimal totalExpensesFor(int year, int month) {
+        return expenseQuery.totalForYearMonth(year, month);
+    }
+
     // сумма расхода за текущий месяц
     public BigDecimal totalExpenseForCurrentMonth() {
         return expenseQuery.totalForCurrentMonth();

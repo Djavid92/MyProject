@@ -30,9 +30,8 @@ public class ExpenseQueryService implements MonthlyTotalCalculator {
     // сумма за конкретный месяц
     @Override
     public BigDecimal totalForYearMonth(int year, int month) {
-        LocalDate start = LocalDate.of(year, month, 1);
-        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
-        return expenseRepository.sumAmountBetween(start, end);
+        return expenseRepository.sumAmountBetween(util.getStartAndEndDate(year, month).get("startDate"),
+                util.getStartAndEndDate(year, month).get("endDate"));
     }
 
     // сумма для текущего месяца

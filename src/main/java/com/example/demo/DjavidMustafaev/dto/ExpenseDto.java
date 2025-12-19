@@ -1,4 +1,5 @@
 package com.example.demo.DjavidMustafaev.dto;
+import com.example.demo.DjavidMustafaev.model.Category;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -21,8 +22,13 @@ import java.time.LocalDate;
 public class ExpenseDto {
     private Long id;
 
-    @Size(max = 100, message = "Категория должна быть не больше 100 символов")
-    private String category;
+    @Size(max = 100, message = "Название должно быть не больше 100 символов")
+    public String name;
+
+
+    private Category category;
+
+    private Long categoryId;
 
     @NotNull(message = "Сумма не может быть пустой")
     @Positive(message = "Сумма должна быть положительным числом")
