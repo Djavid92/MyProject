@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -26,7 +27,7 @@ public class ExpenseDto {
     public String name;
 
 
-    private Category category;
+    private CategoryDto categoryDto;
 
     private Long categoryId;
 

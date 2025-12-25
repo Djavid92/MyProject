@@ -7,6 +7,8 @@ import com.example.demo.DjavidMustafaev.service.serviceCategory.CategoryService;
 import com.example.demo.DjavidMustafaev.service.serviceExpense.FinanceFacadeExpense;
 import com.example.demo.DjavidMustafaev.service.serviceIncome.FinanceFacadeIncome;
 import com.example.demo.DjavidMustafaev.util.Util;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "main_methods")
 @RestController
 @RequestMapping("/api/dashboard")
 @RequiredArgsConstructor
@@ -35,9 +38,12 @@ public class FinanceController {
     private final CategoryService categoryService;
     private final Util util;
 
-
-
-    @GetMapping("/totals")
+    @Operation(
+            summary = "Получает общую сумму доходов и расходов за текущий месяц",
+            description = "Содержит в себе 2 метода из сервиса которые принимают в качестве параметра текущую дату и"
+            + " " + "выдают сумму расходов и доходов отдельно за текущий месяц"
+    )
+    @GetMapping("/totals") // сумма доходов и расходов за текущий месяц
     public ResponseEntity<Map<String, BigDecimal>> getTotalIncomeAndExpense() {
         BigDecimal totalIncome = financeFacadeIncome.totalIncomeForCurrentMonth();
         BigDecimal totalExpense = financeFacadeExpense.totalExpenseForCurrentMonth();
@@ -48,7 +54,11 @@ public class FinanceController {
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping("/totals/by-month")
+    @Operation(
+            summary = "Получает общую сумму доходов и расходов за произвольный месяц",
+            description = "Принимает в качестве параметра год и месяц и выдает сумму доходов расходов за произвольный месяц"
+    )
+    @GetMapping("/totals/by-month") // сумма доходов и расходов за остальные месяца
     public ResponseEntity<Map<String, BigDecimal>> getTotalsByMonth(@RequestParam("year") int year,
                                                                     @RequestParam("month") int month) {
         Map<String,BigDecimal> response = new HashMap<>();
@@ -57,7 +67,12 @@ public class FinanceController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/operations/by-month")
+    @Operation(
+            summary = "Получает операции доходов и расходов за любой месяц кроме текущего",
+            description = "Принимает в качестве параметра год и месяц и выдает операции доходов расходов" + " " +
+    "за произвольный месяц"
+    )
+    @GetMapping("/operations/by-month") // операции за любой месяц
     public ResponseEntity<Map<String, Object>> getOperationByMonth(@RequestParam("year") int year,
                                                                    @RequestParam("month") int month){
         Map<String, LocalDate> mapDate = util.getStartAndEndDate(year, month);
@@ -72,49 +87,68 @@ public class FinanceController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/balance")
-    public ResponseEntity<Map<String, BigDecimal>> getIncomeAndExpenseForPreviousMonth() {
-        BigDecimal totalIncomeForPreviousMonth = financeFacadeIncome.totalIncomeForPreviousMonth();
-        BigDecimal totalExpenseForPreviousMonth = financeFacadeExpense.totalExpenseForPreviousMonth();
-
-        Map <String, BigDecimal> response = new HashMap<>();
-        response.put("previousIncome", totalIncomeForPreviousMonth);
-        response.put("previousExpense", totalExpenseForPreviousMonth);
-        return ResponseEntity.ok().body(response);
-    }
-
-    @GetMapping("/incomes")
+    @Operation(
+            summary = "Выдает все доходы за выбранный период",
+            description = "Принимает в качестве параметра начало и конец даты и выдает операции доходов" + " " +
+                    "за этот период"
+    )
+    @GetMapping("/incomes") // все доходы за выбранный период
     public List<IncomeDto> getIncomes(@RequestParam(value = "startDate", required = false)LocalDate startDate,
                                       @RequestParam(value = "endDate", required = false)LocalDate endDate) {
         return financeFacadeIncome.listIncome(startDate, endDate);
     }
 
-    @GetMapping("/expenses")
+    @Operation(
+            summary = "Выдает все расходы за выбранный период",
+            description = "Принимает в качестве параметра начало и конец даты и выдает операции расходов" + " " +
+                    "за этот период"
+    )
+    @GetMapping("/expenses") // все расходы за выбранный период
     public List<ExpenseDto> getExpense(@RequestParam(value = "startDate", required = false)LocalDate startDate,
                                        @RequestParam(value = "endDate", required = false)LocalDate endDate) {
         return financeFacadeExpense.listExpenses(startDate, endDate);
     }
 
-    @PostMapping("/addIncome")
-    public ResponseEntity<String> addIncome(@Valid @RequestBody IncomeDto incomeDto) {
+    @Operation(
+            summary = "Добавляет новую операцию дохода в базу",
+            description = "Получает DTO дохода, ищет подходящую категорию в таблице," + " " +
+                    "билдером присваивает к сущности" + " " +
+                    "и сохраняет в базу"
+    )
+    @PostMapping("/addIncome") // добавление дохода
+    public ResponseEntity<String> addIncome(@RequestBody IncomeDto incomeDto) {
         financeFacadeIncome.addIncome(incomeDto);
         return ResponseEntity.status(201).body("Доход успешно добавлен");
     }
 
-    @PostMapping("/addExpense")
-    public ResponseEntity<String> addExpense(@Valid @RequestBody ExpenseDto expenseDto) {
+    @Operation(
+            summary = "Добавляет новую операцию расхода в базу",
+            description = "Получает DTO расхода, ищет подходящую категорию в таблице," + " " +
+                    "билдером присваивает к сущности" + " " +
+                    "и сохраняет в базу"
+    )
+    @PostMapping("/addExpense") // добавление расхода
+    public ResponseEntity<String> addExpense(@RequestBody ExpenseDto expenseDto) {
         financeFacadeExpense.addExpense(expenseDto);
         return ResponseEntity.status(201).body("Расход успешно добавлен");
     }
 
-    @DeleteMapping("/delete/all")
+    @Operation(
+            summary = "Удаление всех операций",
+            description = "Удаление доходов и расходов из базы данных за все периоды"
+    )
+    @DeleteMapping("/delete/all") // удалить все
     public ResponseEntity<String> deleteAll() {
         financeFacadeIncome.deleteAll();
         financeFacadeExpense.deleteAll();
         return ResponseEntity.ok("Все успешно удалилось");
     }
 
-    @DeleteMapping("/incomes/{id}")
+    @Operation(
+            summary = "Удаление дохода",
+            description = "Удаление конкретного дохода по id из базы данных"
+    )
+    @DeleteMapping("/incomes/{id}") // удалить конкретный доход операцию
     public ResponseEntity<Void> deleteIncomeOperation(@PathVariable ("id") Long id) {
         boolean deleted = financeFacadeIncome.deleteIncome(id);
         if (deleted) {
@@ -124,7 +158,11 @@ public class FinanceController {
         }
     }
 
-    @DeleteMapping("/expenses/{id}")
+    @Operation(
+            summary = "Удаление расхода",
+            description = "Удаление конкретного расхода по id из базы данных"
+    )
+    @DeleteMapping("/expenses/{id}") // удалить конкретный расход
     public ResponseEntity<Void> deleteExpenseOperation(@PathVariable ("id") Long id) {
         boolean deleted = financeFacadeExpense.deleteExpense(id);
         if (deleted) {
@@ -134,18 +172,30 @@ public class FinanceController {
         }
     }
 
-    @PostMapping("/addCategory")
+    @Operation(
+            summary = "Добавление новой категории в базу",
+            description = "Принимает DTO категории и маппит ее до сущности и сохраняет в базе"
+    )
+    @PostMapping("/addCategory") // добавить категорию
     public ResponseEntity<String> createCategory(@Valid @RequestBody CategoryDto categoryDto) {
         categoryService.create(categoryDto);
         return ResponseEntity.status(201).body("Категория успешно добавлена");
     }
 
-    @GetMapping("/categories")
+    @Operation(
+            summary = "Выводит все категории",
+            description = "Получает из базы все сохраненные категории"
+    )
+    @GetMapping("/categories") // получить все категории
     public List<CategoryDto> listCategories() {
         return categoryService.getAll();
     }
 
-    @DeleteMapping("/category/{id}")
+    @Operation(
+            summary = "Удаляет категорию",
+            description = "Принимает id в параметрах, ищет в базе категорию и удаляет ее"
+    )
+    @DeleteMapping("/category/{id}") // удалить конкретную категорию
     public ResponseEntity<Void> deleteCategory(@PathVariable("id") Long id) {
         boolean deleted = categoryService.delete(id);
         if (deleted) {

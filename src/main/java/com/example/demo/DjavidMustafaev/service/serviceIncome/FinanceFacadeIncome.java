@@ -4,6 +4,7 @@ import com.example.demo.DjavidMustafaev.dto.IncomeDto;
 import com.example.demo.DjavidMustafaev.model.Income;
 import com.example.demo.DjavidMustafaev.util.Util;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ public class FinanceFacadeIncome {
     private final Util util;
 
     // лист дохода полностью
+    @Cacheable(value = "incomes", key = "#startDate + '::' + #endDate")
     public List<IncomeDto> listIncome(LocalDate startDate, LocalDate endDate) {
         return incomeQuery.list(startDate, endDate);
     }
@@ -35,10 +37,6 @@ public class FinanceFacadeIncome {
         return incomeQuery.totalForCurrentMonth();
     }
 
-    // сумма дохода за прошлый месяц
-    public BigDecimal totalIncomeForPreviousMonth() {
-        return incomeQuery.totalForPreviousMonth();
-    }
 
     // добавить доход
     @Transactional

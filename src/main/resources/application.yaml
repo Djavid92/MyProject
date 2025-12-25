@@ -22,3 +22,7 @@ spring:
   server:
     servlet:
       context-path: /
+  data:
+    redis:
+      host: localhost
+      port: 6379

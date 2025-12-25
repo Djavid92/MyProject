@@ -7,3 +7,11 @@ services:
       - 'POSTGRES_USER=djavid'
     ports:
       - "5432:5432"
+
+  # Сервис Redis
+  redis:
+    image: redis:7-alpine
+    container_name: redis_container
+    ports:
+      - "6379:6379"
+    restart: always

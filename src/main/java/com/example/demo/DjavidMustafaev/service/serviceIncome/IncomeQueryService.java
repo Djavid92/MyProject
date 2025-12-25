@@ -6,6 +6,9 @@ import com.example.demo.DjavidMustafaev.repositories.IncomeRepository;
 import com.example.demo.DjavidMustafaev.service.MonthlyTotalCalculator;
 import com.example.demo.DjavidMustafaev.util.Util;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,31 +24,32 @@ public class IncomeQueryService implements MonthlyTotalCalculator {
     private final IncomeExpenseMapper incomeExpenseMapper;
     private final Util util;
 
+    @Lazy
+    @Autowired
+    private IncomeQueryService incomeQueryService;
+
+    // лист доходов за выбранный период
+    @Cacheable(value = "incomes", key = "#startDate + '::' + #endDate")
     public List<IncomeDto> list(LocalDate startDate, LocalDate endDate) {
         return incomeRepository.findIncomesByDateRange(startDate, endDate).stream()
                 .map(incomeExpenseMapper::toIncomeDto).toList();
 
     }
 
-    // сумма за конкретный месяц
+    // сумма доходов за конкретный месяц
+    @Cacheable(value = "incomeTotalForYearMonth", key = "#year + '::' + #month")
     @Override
     public BigDecimal totalForYearMonth(int year, int month) {
         return incomeRepository.sumAmountBetween(util.getStartAndEndDate(year, month).get("startDate"),
-                util.getStartAndEndDate(year, month).get("endDate"));
+                util.getStartAndEndDate(year, month).get("endDate")); // достает из мапы в классе Util начальное и конечное значение
     }
 
-    // сумма для текущего месяца
+    // сумма доходов для текущего месяца
+    @Cacheable(value = "incomeTotalForCurrentMonth", key = "T(java.time.LocalDate).now().withDayOfMonth(1)")
     @Override
     public BigDecimal totalForCurrentMonth() {
-        return totalForYearMonth(util.getCurrentDateInTimeZone().getYear(), util.getCurrentDateInTimeZone().getMonthValue());
+        return incomeQueryService.totalForYearMonth(util.getCurrentDateInTimeZone().getYear(),
+                util.getCurrentDateInTimeZone().getMonthValue()); // достает из метода класса Util месяц и год
     }
 
-    // сумма за прошлый месяц
-    @Override
-    public BigDecimal totalForPreviousMonth() {
-        LocalDate firstDayOfPreviousMonth = util.getCurrentDateInTimeZone().minusMonths(1).withDayOfMonth(1);
-        LocalDate lastDayOfPreviousMonth = util.getCurrentDateInTimeZone().minusMonths(1)
-                .withDayOfMonth(util.getCurrentDateInTimeZone().minusMonths(1).lengthOfMonth());
-        return totalForYearMonth(firstDayOfPreviousMonth.getYear(), lastDayOfPreviousMonth.getMonthValue());
-    }
 }

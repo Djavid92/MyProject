@@ -2,6 +2,7 @@ package com.example.demo.DjavidMustafaev.service.serviceExpense;
 
 import com.example.demo.DjavidMustafaev.dto.ExpenseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,10 +31,6 @@ public class FinanceFacadeExpense {
         return expenseQuery.totalForCurrentMonth();
     }
 
-    // сумма расхода за прошлый месяц
-    public BigDecimal totalExpenseForPreviousMonth() {
-        return expenseQuery.totalForPreviousMonth();
-    }
 
     // добавить расход
     @Transactional

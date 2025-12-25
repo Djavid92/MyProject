@@ -16,8 +16,4 @@ public class WebController {
         return "forward:/dashboard.html";
     }
 
-    @GetMapping("/previous")
-    public String previous() {
-        return "forward:/previousInfo.html";
-    }
 }
