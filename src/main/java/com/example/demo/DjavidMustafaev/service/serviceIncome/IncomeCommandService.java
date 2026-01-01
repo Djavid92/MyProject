@@ -1,7 +1,6 @@
 package com.example.demo.DjavidMustafaev.service.serviceIncome;
 
 import com.example.demo.DjavidMustafaev.dto.IncomeDto;
-import com.example.demo.DjavidMustafaev.mapper.CategoryMapper;
 import com.example.demo.DjavidMustafaev.model.Category;
 import com.example.demo.DjavidMustafaev.model.Income;
 import com.example.demo.DjavidMustafaev.repositories.CategoryRepository;
@@ -11,7 +10,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,8 +23,6 @@ import java.util.Optional;
 public class IncomeCommandService {
     private final IncomeRepository incomeRepository;
     private final CategoryRepository categoryRepository;
-    private final Util util;
-    private final CategoryMapper categoryMapper;
 
     @Caching(evict ={
             @CacheEvict(value = "incomes", allEntries = true),
@@ -34,8 +30,8 @@ public class IncomeCommandService {
             @CacheEvict(value = "incomeTotalForCurrentMonth", allEntries = true)
 
     })
-    public IncomeDto save(@NotNull IncomeDto dto) {
-        util.isAfterToday(dto);
+    public void save(@NotNull IncomeDto dto) {
+        Util.isAfterToday(dto.getDate());
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Категория не найдена"));
 
@@ -47,15 +43,6 @@ public class IncomeCommandService {
                 .date(dto.getDate())
                 .build();
         incomeRepository.save(income);
-
-        return IncomeDto.builder()
-                .id(income.getId())
-                .name(income.getName())
-                .categoryDto(categoryMapper.toCategoryDto(income.getCategory()))
-                .amount(income.getAmount())
-                .description(income.getDescription())
-                .date(income.getDate())
-                .build();
     }
 
 

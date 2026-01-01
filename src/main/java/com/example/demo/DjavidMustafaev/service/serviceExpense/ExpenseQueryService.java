@@ -22,7 +22,6 @@ import java.util.List;
 public class ExpenseQueryService implements MonthlyTotalCalculator {
     private final ExpenseRepository expenseRepository;
     private final IncomeExpenseMapper incomeExpenseMapper;
-    private final Util util;
 
     @Lazy
     @Autowired
@@ -39,16 +38,16 @@ public class ExpenseQueryService implements MonthlyTotalCalculator {
     @Cacheable(value = "expenseTotalForYearMonth", key = "#year + '::' + #month")
     @Override
     public BigDecimal totalForYearMonth(int year, int month) {
-        return expenseRepository.sumAmountBetween(util.getStartAndEndDate(year, month).get("startDate"),
-                util.getStartAndEndDate(year, month).get("endDate")); // достает из мапы в классе Util начальное и конечное значение
+        return expenseRepository.sumAmountBetween(Util.getStartAndEndDate(year, month).get("startDate"),
+                Util.getStartAndEndDate(year, month).get("endDate")); // достает из мапы в классе Util начальное и конечное значение
     }
 
-    // сумма расходов для текущего месяца
+    // сумма расходов для текущего месяц
     @Cacheable(value = "expenseTotalForCurrentMonth", key = "T(java.time.LocalDate).now().withDayOfMonth(1)")
     @Override
     public BigDecimal totalForCurrentMonth() {
-        return expenseQueryService.totalForYearMonth(util.getCurrentDateInTimeZone().getYear(),
-                util.getCurrentDateInTimeZone().getMonthValue()); // достает из метода класса Util месяц и год
+        return expenseQueryService.totalForYearMonth(Util.getCurrentDateInTimeZone().getYear(),
+                Util.getCurrentDateInTimeZone().getMonthValue()); // достает из метода класса Util месяц и год
     }
 
 }

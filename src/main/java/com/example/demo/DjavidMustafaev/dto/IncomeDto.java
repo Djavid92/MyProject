@@ -1,6 +1,6 @@
 package com.example.demo.DjavidMustafaev.dto;
 
-import com.example.demo.DjavidMustafaev.model.Category;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -27,7 +26,8 @@ public class IncomeDto {
     @Size(max = 100, message = "Название должно быть не больше 100 символов")
     private String name;
 
-    private CategoryDto categoryDto;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private CategoryDto category;
 
     private Long categoryId;
 

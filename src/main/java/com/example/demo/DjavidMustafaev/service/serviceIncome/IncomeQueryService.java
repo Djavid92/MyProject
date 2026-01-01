@@ -22,7 +22,6 @@ import java.util.List;
 public class IncomeQueryService implements MonthlyTotalCalculator {
     private final IncomeRepository incomeRepository;
     private final IncomeExpenseMapper incomeExpenseMapper;
-    private final Util util;
 
     @Lazy
     @Autowired
@@ -40,16 +39,16 @@ public class IncomeQueryService implements MonthlyTotalCalculator {
     @Cacheable(value = "incomeTotalForYearMonth", key = "#year + '::' + #month")
     @Override
     public BigDecimal totalForYearMonth(int year, int month) {
-        return incomeRepository.sumAmountBetween(util.getStartAndEndDate(year, month).get("startDate"),
-                util.getStartAndEndDate(year, month).get("endDate")); // достает из мапы в классе Util начальное и конечное значение
+        return incomeRepository.sumAmountBetween(Util.getStartAndEndDate(year, month).get("startDate"),
+                Util.getStartAndEndDate(year, month).get("endDate")); // достает из мапы в классе Util начальное и конечное значение
     }
 
     // сумма доходов для текущего месяца
     @Cacheable(value = "incomeTotalForCurrentMonth", key = "T(java.time.LocalDate).now().withDayOfMonth(1)")
     @Override
     public BigDecimal totalForCurrentMonth() {
-        return incomeQueryService.totalForYearMonth(util.getCurrentDateInTimeZone().getYear(),
-                util.getCurrentDateInTimeZone().getMonthValue()); // достает из метода класса Util месяц и год
+        return incomeQueryService.totalForYearMonth(Util.getCurrentDateInTimeZone().getYear(),
+                Util.getCurrentDateInTimeZone().getMonthValue()); // достает из метода класса Util месяц и года
     }
 
 }

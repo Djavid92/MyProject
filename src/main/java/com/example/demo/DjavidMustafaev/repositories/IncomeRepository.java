@@ -15,7 +15,8 @@ public interface IncomeRepository extends JpaRepository<Income, Long> {
     @Query("select i from Income i where i.date >= :startDate and i.date <= :endDate")
     List<Income> findIncomesByDateRange(@Param("startDate")LocalDate startDate, @Param("endDate")LocalDate endDate);
     // сумма между датами (включительно)
-    @Query("select coalesce(sum(i.amount), 0) from Income i where i.date >= :start and i.date <= :end")
+    @Query("select cast(coalesce(sum(i.amount), 0) as java.math.BigDecimal) " +
+            "from Income i where i.date >= :start and i.date <= :end")
     BigDecimal sumAmountBetween(LocalDate start, LocalDate end);
 
 }

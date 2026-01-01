@@ -11,12 +11,14 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface IncomeExpenseMapper {
 
-    @Mapping(target = "categoryId", ignore = true)
+    @Mapping(source = "category", target = "category")
+    @Mapping(source = "category.id", target = "categoryId")
     ExpenseDto toExpenseDto(Expense expense);
 
     Expense toExpenseEntity(ExpenseDto expenseDto);
 
-    @Mapping(target = "categoryId", ignore = true)
+    @Mapping(source = "category", target = "category")
+    @Mapping(source = "category.id", target = "categoryId")
     IncomeDto toIncomeDto (Income income);
     Income toIncomeEntity (IncomeDto incomeDto);
 }

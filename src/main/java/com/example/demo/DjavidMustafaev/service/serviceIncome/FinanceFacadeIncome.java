@@ -1,25 +1,20 @@
 package com.example.demo.DjavidMustafaev.service.serviceIncome;
 
 import com.example.demo.DjavidMustafaev.dto.IncomeDto;
-import com.example.demo.DjavidMustafaev.model.Income;
-import com.example.demo.DjavidMustafaev.util.Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class FinanceFacadeIncome {
     private final IncomeCommandService incomeCmd;
     private final IncomeQueryService incomeQuery;
-    private final Util util;
 
     // лист дохода полностью
     @Cacheable(value = "incomes", key = "#startDate + '::' + #endDate")

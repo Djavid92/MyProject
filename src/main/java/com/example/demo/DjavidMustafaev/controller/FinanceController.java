@@ -36,12 +36,11 @@ public class FinanceController {
     private final FinanceFacadeIncome financeFacadeIncome;
     private final FinanceFacadeExpense financeFacadeExpense;
     private final CategoryService categoryService;
-    private final Util util;
 
     @Operation(
             summary = "Получает общую сумму доходов и расходов за текущий месяц",
             description = "Содержит в себе 2 метода из сервиса которые принимают в качестве параметра текущую дату и"
-            + " " + "выдают сумму расходов и доходов отдельно за текущий месяц"
+                    + " " + "выдают сумму расходов и доходов отдельно за текущий месяц"
     )
     @GetMapping("/totals") // сумма доходов и расходов за текущий месяц
     public ResponseEntity<Map<String, BigDecimal>> getTotalIncomeAndExpense() {
@@ -61,7 +60,7 @@ public class FinanceController {
     @GetMapping("/totals/by-month") // сумма доходов и расходов за остальные месяца
     public ResponseEntity<Map<String, BigDecimal>> getTotalsByMonth(@RequestParam("year") int year,
                                                                     @RequestParam("month") int month) {
-        Map<String,BigDecimal> response = new HashMap<>();
+        Map<String, BigDecimal> response = new HashMap<>();
         response.put("income", financeFacadeIncome.totalIncomesFor(year, month));
         response.put("expense", financeFacadeExpense.totalExpensesFor(year, month));
         return ResponseEntity.ok(response);
@@ -70,12 +69,12 @@ public class FinanceController {
     @Operation(
             summary = "Получает операции доходов и расходов за любой месяц кроме текущего",
             description = "Принимает в качестве параметра год и месяц и выдает операции доходов расходов" + " " +
-    "за произвольный месяц"
+                    "за произвольный месяц"
     )
     @GetMapping("/operations/by-month") // операции за любой месяц
     public ResponseEntity<Map<String, Object>> getOperationByMonth(@RequestParam("year") int year,
-                                                                   @RequestParam("month") int month){
-        Map<String, LocalDate> mapDate = util.getStartAndEndDate(year, month);
+                                                                   @RequestParam("month") int month) {
+        Map<String, LocalDate> mapDate = Util.getStartAndEndDate(year, month);
         List<IncomeDto> incomes = financeFacadeIncome.listIncome(mapDate.get("startDate"), mapDate.get("endDate"));
         List<ExpenseDto> expenses = financeFacadeExpense.listExpenses(mapDate.get("startDate"), mapDate.get("endDate"));
 
@@ -87,27 +86,6 @@ public class FinanceController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(
-            summary = "Выдает все доходы за выбранный период",
-            description = "Принимает в качестве параметра начало и конец даты и выдает операции доходов" + " " +
-                    "за этот период"
-    )
-    @GetMapping("/incomes") // все доходы за выбранный период
-    public List<IncomeDto> getIncomes(@RequestParam(value = "startDate", required = false)LocalDate startDate,
-                                      @RequestParam(value = "endDate", required = false)LocalDate endDate) {
-        return financeFacadeIncome.listIncome(startDate, endDate);
-    }
-
-    @Operation(
-            summary = "Выдает все расходы за выбранный период",
-            description = "Принимает в качестве параметра начало и конец даты и выдает операции расходов" + " " +
-                    "за этот период"
-    )
-    @GetMapping("/expenses") // все расходы за выбранный период
-    public List<ExpenseDto> getExpense(@RequestParam(value = "startDate", required = false)LocalDate startDate,
-                                       @RequestParam(value = "endDate", required = false)LocalDate endDate) {
-        return financeFacadeExpense.listExpenses(startDate, endDate);
-    }
 
     @Operation(
             summary = "Добавляет новую операцию дохода в базу",
@@ -149,7 +127,7 @@ public class FinanceController {
             description = "Удаление конкретного дохода по id из базы данных"
     )
     @DeleteMapping("/incomes/{id}") // удалить конкретный доход операцию
-    public ResponseEntity<Void> deleteIncomeOperation(@PathVariable ("id") Long id) {
+    public ResponseEntity<Void> deleteIncomeOperation(@PathVariable("id") Long id) {
         boolean deleted = financeFacadeIncome.deleteIncome(id);
         if (deleted) {
             return ResponseEntity.noContent().build();
@@ -163,7 +141,7 @@ public class FinanceController {
             description = "Удаление конкретного расхода по id из базы данных"
     )
     @DeleteMapping("/expenses/{id}") // удалить конкретный расход
-    public ResponseEntity<Void> deleteExpenseOperation(@PathVariable ("id") Long id) {
+    public ResponseEntity<Void> deleteExpenseOperation(@PathVariable("id") Long id) {
         boolean deleted = financeFacadeExpense.deleteExpense(id);
         if (deleted) {
             return ResponseEntity.noContent().build();
