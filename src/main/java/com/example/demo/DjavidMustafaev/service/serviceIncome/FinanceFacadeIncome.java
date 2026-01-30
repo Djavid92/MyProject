@@ -2,7 +2,6 @@ package com.example.demo.DjavidMustafaev.service.serviceIncome;
 
 import com.example.demo.DjavidMustafaev.dto.IncomeDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +16,6 @@ public class FinanceFacadeIncome {
     private final IncomeQueryService incomeQuery;
 
     // лист дохода полностью
-    @Cacheable(value = "incomes", key = "#startDate + '::' + #endDate")
     public List<IncomeDto> listIncome(LocalDate startDate, LocalDate endDate) {
         return incomeQuery.list(startDate, endDate);
     }

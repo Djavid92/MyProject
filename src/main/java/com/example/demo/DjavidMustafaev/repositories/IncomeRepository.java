@@ -1,6 +1,7 @@
 package com.example.demo.DjavidMustafaev.repositories;
 
 import com.example.demo.DjavidMustafaev.model.Income;
+import io.micrometer.core.annotation.Timed;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -12,6 +12,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class FinanceFacadeExpense {
+
     private final ExpenseCommandService expenseCmd;
     private final ExpenseQueryService expenseQuery;
 

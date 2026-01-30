@@ -17,23 +17,24 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional
 public class CategoryService {
+    public static final String CACHEABLE_CATEGORY_VALUE = "categories";
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
 
-    @Cacheable(value = "categories")
+    @Cacheable(value = CACHEABLE_CATEGORY_VALUE)
     public List<CategoryDto> getAll() {
         return categoryRepository.findAll().stream()
                 .map(categoryMapper::toCategoryDto).toList();
     }
 
 
-    @CacheEvict(value = "categories", allEntries = true)
+    @CacheEvict(value = CACHEABLE_CATEGORY_VALUE, allEntries = true)
     public CategoryDto create(CategoryDto categoryDto) {
         Category category = categoryRepository.save(categoryMapper.toCategoryEntity(categoryDto));
         return categoryMapper.toCategoryDto(category);
     }
 
-    @CacheEvict(value = "categories", allEntries = true)
+    @CacheEvict(value = CACHEABLE_CATEGORY_VALUE, allEntries = true)
     public boolean delete(Long id) {
         Optional<Category> categoryOptional = categoryRepository.findById(id);
         categoryOptional.ifPresent(category -> categoryRepository.deleteById(id));

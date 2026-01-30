@@ -20,6 +20,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class IncomeQueryService implements MonthlyTotalCalculator {
+    public static final String CACHEABLE_INCOMES_VALUE = "incomes";
+    public static final String CACHEABLE_INCOMES_TOTAL_FOR_YEAR_MONTH_VALUE = "incomeTotalForYearMonth";
+    public static final String CACHEABLE_INCOMES_TOTAL_FOR_CURRENT_MONTH_VALUE = "incomeTotalForCurrentMonth";
+
     private final IncomeRepository incomeRepository;
     private final IncomeExpenseMapper incomeExpenseMapper;
 
@@ -28,7 +32,7 @@ public class IncomeQueryService implements MonthlyTotalCalculator {
     private IncomeQueryService incomeQueryService;
 
     // лист доходов за выбранный период
-    @Cacheable(value = "incomes", key = "#startDate + '::' + #endDate")
+    @Cacheable(value = CACHEABLE_INCOMES_VALUE, key = "#startDate + '::' + #endDate")
     public List<IncomeDto> list(LocalDate startDate, LocalDate endDate) {
         return incomeRepository.findIncomesByDateRange(startDate, endDate).stream()
                 .map(incomeExpenseMapper::toIncomeDto).toList();
@@ -36,19 +40,19 @@ public class IncomeQueryService implements MonthlyTotalCalculator {
     }
 
     // сумма доходов за конкретный месяц
-    @Cacheable(value = "incomeTotalForYearMonth", key = "#year + '::' + #month")
+    @Cacheable(value = CACHEABLE_INCOMES_TOTAL_FOR_YEAR_MONTH_VALUE, key = "#year + '::' + #month")
     @Override
     public BigDecimal totalForYearMonth(int year, int month) {
-        return incomeRepository.sumAmountBetween(Util.getStartAndEndDate(year, month).get("startDate"),
-                Util.getStartAndEndDate(year, month).get("endDate")); // достает из мапы в классе Util начальное и конечное значение
+        return incomeRepository.sumAmountBetween(Util.getStartAndEndDate(year, month).get(Util.START_DATE_KEY),
+                Util.getStartAndEndDate(year, month).get(Util.END_DATE_KEY)); // достает из мапы в классе Util начальное и конечное значение
     }
 
     // сумма доходов для текущего месяца
-    @Cacheable(value = "incomeTotalForCurrentMonth", key = "T(java.time.LocalDate).now().withDayOfMonth(1)")
+    @Cacheable(value = CACHEABLE_INCOMES_TOTAL_FOR_CURRENT_MONTH_VALUE, key = "T(java.time.LocalDate).now().withDayOfMonth(1)")
     @Override
     public BigDecimal totalForCurrentMonth() {
         return incomeQueryService.totalForYearMonth(Util.getCurrentDateInTimeZone().getYear(),
-                Util.getCurrentDateInTimeZone().getMonthValue()); // достает из метода класса Util месяц и года
+                Util.getCurrentDateInTimeZone().getMonthValue()); // достает из метода класса Util месяц и год
     }
 
 }

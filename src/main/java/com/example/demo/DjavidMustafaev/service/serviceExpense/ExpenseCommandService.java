@@ -26,9 +26,9 @@ public class ExpenseCommandService {
 
 
     @Caching(evict = {
-            @CacheEvict(value = "expenses", allEntries = true),
-            @CacheEvict(value = "expenseTotalForYearMonth", allEntries = true),
-            @CacheEvict(value = "expenseTotalForCurrentMonth", allEntries = true)})
+            @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_VALUE, allEntries = true),
+            @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_TOTAL_FOR_YEAR_MONTH_VALUE, allEntries = true),
+            @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_TOTAL_FOR_CURRENT_MONTH_VALUE, allEntries = true)})
     public void save(@NotNull ExpenseDto dto) {
         Util.isAfterToday(dto.getDate());
         Category category = categoryRepository.findById(dto.getCategoryId())
@@ -41,13 +41,12 @@ public class ExpenseCommandService {
                 .date(dto.getDate())
                 .build();
         expenseRepository.save(expense);
-        System.out.println("Категория: " + expense.getCategory());
     }
 
     @Caching(evict = {
-            @CacheEvict(value = "expenses", allEntries = true),
-            @CacheEvict(value = "expenseTotalForYearMonth", allEntries = true),
-            @CacheEvict(value = "expenseTotalForCurrentMonth", allEntries = true)})
+            @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_VALUE, allEntries = true),
+            @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_TOTAL_FOR_YEAR_MONTH_VALUE, allEntries = true),
+            @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_TOTAL_FOR_CURRENT_MONTH_VALUE, allEntries = true)})
     public boolean delete(Long id) {
         Optional<Expense> expenseOptional = expenseRepository.findById(id);
         expenseOptional.ifPresent(exp -> expenseRepository.deleteById(id));
@@ -55,9 +54,9 @@ public class ExpenseCommandService {
     }
 
     @Caching(evict ={
-            @CacheEvict(value = "expenses", allEntries = true),
-            @CacheEvict(value = "expenseTotalForYearMonth", allEntries = true),
-            @CacheEvict(value = "expenseTotalForCurrentMonth", allEntries = true)
+            @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_VALUE, allEntries = true),
+            @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_TOTAL_FOR_YEAR_MONTH_VALUE, allEntries = true),
+            @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_TOTAL_FOR_CURRENT_MONTH_VALUE, allEntries = true)
 
     })
     public void deleteAll() {

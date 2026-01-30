@@ -25,9 +25,9 @@ public class IncomeCommandService {
     private final CategoryRepository categoryRepository;
 
     @Caching(evict ={
-            @CacheEvict(value = "incomes", allEntries = true),
-            @CacheEvict(value = "incomeTotalForYearMonth", allEntries = true),
-            @CacheEvict(value = "incomeTotalForCurrentMonth", allEntries = true)
+            @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_VALUE, allEntries = true),
+            @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_TOTAL_FOR_YEAR_MONTH_VALUE, allEntries = true),
+            @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_TOTAL_FOR_CURRENT_MONTH_VALUE, allEntries = true)
 
     })
     public void save(@NotNull IncomeDto dto) {
@@ -47,9 +47,9 @@ public class IncomeCommandService {
 
 
     @Caching(evict ={
-            @CacheEvict(value = "incomes", allEntries = true),
-            @CacheEvict(value = "incomeTotalForYearMonth", allEntries = true),
-            @CacheEvict(value = "incomeTotalForCurrentMonth", allEntries = true)
+            @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_VALUE, allEntries = true),
+            @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_TOTAL_FOR_YEAR_MONTH_VALUE, allEntries = true),
+            @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_TOTAL_FOR_CURRENT_MONTH_VALUE, allEntries = true)
 
     })
     public boolean delete(Long id) {
@@ -59,9 +59,9 @@ public class IncomeCommandService {
     }
 
     @Caching(evict ={
-            @CacheEvict(value = "incomes", allEntries = true),
-            @CacheEvict(value = "incomeTotalForYearMonth", allEntries = true),
-            @CacheEvict(value = "incomeTotalForCurrentMonth", allEntries = true)
+            @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_VALUE, allEntries = true),
+            @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_TOTAL_FOR_YEAR_MONTH_VALUE, allEntries = true),
+            @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_TOTAL_FOR_CURRENT_MONTH_VALUE, allEntries = true)
 
     })
     public void deleteAll() { incomeRepository.deleteAll(); }

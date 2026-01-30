@@ -20,6 +20,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ExpenseQueryService implements MonthlyTotalCalculator {
+    public static final String CACHEABLE_EXPENSES_VALUE = "expenses";
+    public static final String CACHEABLE_EXPENSES_TOTAL_FOR_YEAR_MONTH_VALUE = "expenseTotalForYearMonth";
+    public static final String CACHEABLE_EXPENSES_TOTAL_FOR_CURRENT_MONTH_VALUE = "expenseTotalForCurrentMonth";
+
     private final ExpenseRepository expenseRepository;
     private final IncomeExpenseMapper incomeExpenseMapper;
 
@@ -28,14 +32,14 @@ public class ExpenseQueryService implements MonthlyTotalCalculator {
     private ExpenseQueryService expenseQueryService; // self injection
 
     // лист расходов за выбранный период
-    @Cacheable(value = "expenses", key = "#startDate + '::' + #endDate")
+    @Cacheable(value = CACHEABLE_EXPENSES_VALUE, key = "#startDate + '::' + #endDate")
     public List<ExpenseDto> list(LocalDate startDate, LocalDate endDate) {
         return expenseRepository.findExpenseByDateRange(startDate, endDate).stream()
                 .map(incomeExpenseMapper::toExpenseDto).toList();
     }
 
     // сумма расходов за конкретный месяц
-    @Cacheable(value = "expenseTotalForYearMonth", key = "#year + '::' + #month")
+    @Cacheable(value = CACHEABLE_EXPENSES_TOTAL_FOR_YEAR_MONTH_VALUE, key = "#year + '::' + #month")
     @Override
     public BigDecimal totalForYearMonth(int year, int month) {
         return expenseRepository.sumAmountBetween(Util.getStartAndEndDate(year, month).get("startDate"),
@@ -43,7 +47,7 @@ public class ExpenseQueryService implements MonthlyTotalCalculator {
     }
 
     // сумма расходов для текущего месяц
-    @Cacheable(value = "expenseTotalForCurrentMonth", key = "T(java.time.LocalDate).now().withDayOfMonth(1)")
+    @Cacheable(value = CACHEABLE_EXPENSES_TOTAL_FOR_CURRENT_MONTH_VALUE, key = "T(java.time.LocalDate).now().withDayOfMonth(1)")
     @Override
     public BigDecimal totalForCurrentMonth() {
         return expenseQueryService.totalForYearMonth(Util.getCurrentDateInTimeZone().getYear(),
