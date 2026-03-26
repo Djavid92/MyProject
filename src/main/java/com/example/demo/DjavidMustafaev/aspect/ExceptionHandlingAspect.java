@@ -19,7 +19,7 @@ import java.math.BigDecimal;
 public class ExceptionHandlingAspect {
     @Around("execution(* com.example.demo.DjavidMustafaev.service..*(..))")
     public Object handleException(ProceedingJoinPoint joinPoint) throws Throwable {
-        String methodName = joinPoint.getSignature().toShortString();
+        String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
         try {
             log.info("Выполнение метода: {}", methodName);

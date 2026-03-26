@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # PostgreSQL для приложения
+  postgres:
+    image: postgres:14
+    container_name: demo-app-postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: djavid
+      POSTGRES_PASSWORD: djavid
+    ports:
+      - "5432:5432"
+    volumes:
+      - demo_app_postgres_data:/var/lib/postgresql/data
+    networks:
+      - demo-app-network
+    restart: unless-stopped
+
+  # Redis для приложения
+  redis:
+    image: redis:7-alpine
+    container_name: demo-app-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - demo_app_redis_data:/data
+    networks:
+      - demo-app-network
+    restart: unless-stopped
+
+  # Ваше приложение
+  app:
+    image: demo:latest
+    container_name: demo-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - demo-app-network
+    restart: unless-stopped
+
+networks:
+  demo-app-network:
+    driver: bridge
+
+volumes:
+  demo_app_postgres_data:
+  demo_app_redis_data:

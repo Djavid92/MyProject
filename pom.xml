@@ -58,11 +58,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
             <version>6.2.0.Final</version>
@@ -93,6 +88,7 @@
             <artifactId>mapstruct-processor</artifactId>
             <version>1.6.3</version>
         </dependency>
+
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -211,7 +207,7 @@
                                         <limit>
                                             <counter>INSTRUCTION</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.80</minimum>
+                                            <minimum>0.8</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
