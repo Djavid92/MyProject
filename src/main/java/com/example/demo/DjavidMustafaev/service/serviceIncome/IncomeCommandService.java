@@ -18,17 +18,17 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Slf4j
 public class IncomeCommandService {
     private final IncomeRepository incomeRepository;
     private final CategoryRepository categoryRepository;
 
-    @Caching(evict ={
+    @Transactional
+    @Caching(evict = {
             @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_VALUE, allEntries = true),
-            @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_TOTAL_FOR_YEAR_MONTH_VALUE, allEntries = true),
+            @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_TOTAL_FOR_YEAR_MONTH_VALUE,
+                    key = "#dto.date.year + '::' + #dto.date.monthValue"),
             @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_TOTAL_FOR_CURRENT_MONTH_VALUE, allEntries = true)
-
     })
     public void save(@NotNull IncomeDto dto) {
         Util.isAfterToday(dto.getDate());
@@ -46,6 +46,29 @@ public class IncomeCommandService {
     }
 
 
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_VALUE, allEntries = true),
+            @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_TOTAL_FOR_YEAR_MONTH_VALUE,
+                    key = "#dto.date.year + '::' + #dto.date.monthValue"),
+            @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_TOTAL_FOR_CURRENT_MONTH_VALUE, allEntries = true)
+    })
+    public boolean update(Long id, @NotNull IncomeDto dto) {
+        return incomeRepository.findById(id).map(income -> {
+            Util.isAfterToday(dto.getDate());
+            Category category = categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new IllegalArgumentException("Категория не найдена"));
+            income.setName(dto.getName());
+            income.setCategory(category);
+            income.setAmount(dto.getAmount());
+            income.setDescription(dto.getDescription());
+            income.setDate(dto.getDate());
+            incomeRepository.save(income);
+            return true;
+        }).orElse(false);
+    }
+
+    @Transactional
     @Caching(evict ={
             @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_VALUE, allEntries = true),
             @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_TOTAL_FOR_YEAR_MONTH_VALUE, allEntries = true),
@@ -58,11 +81,4 @@ public class IncomeCommandService {
         return incomeOptional.isPresent();
     }
 
-    @Caching(evict ={
-            @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_VALUE, allEntries = true),
-            @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_TOTAL_FOR_YEAR_MONTH_VALUE, allEntries = true),
-            @CacheEvict(value = IncomeQueryService.CACHEABLE_INCOMES_TOTAL_FOR_CURRENT_MONTH_VALUE, allEntries = true)
-
-    })
-    public void deleteAll() { incomeRepository.deleteAll(); }
 }

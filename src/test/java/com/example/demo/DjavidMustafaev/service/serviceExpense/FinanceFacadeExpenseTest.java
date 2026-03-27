@@ -75,6 +75,17 @@ class FinanceFacadeExpenseTest {
     }
 
     @Test
+    void updateExpense_shouldReturnResultFromCommand() {
+        ExpenseDto dto = new ExpenseDto();
+        when(expenseCmd.update(1L, dto)).thenReturn(true);
+
+        boolean result = facade.updateExpense(1L, dto);
+
+        assertTrue(result);
+        verify(expenseCmd).update(1L, dto);
+    }
+
+    @Test
     void deleteExpense_shouldReturnResult() {
         when(expenseCmd.delete(1L)).thenReturn(true);
 
@@ -84,10 +95,4 @@ class FinanceFacadeExpenseTest {
         verify(expenseCmd).delete(1L);
     }
 
-    @Test
-    void deleteAll_shouldCallCommand() {
-        facade.deleteAll();
-
-        verify(expenseCmd).deleteAll();
-    }
 }

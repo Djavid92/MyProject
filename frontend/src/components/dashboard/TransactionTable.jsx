@@ -7,7 +7,7 @@ const fmt = (n) =>
 const fmtDate = (d) =>
   new Date(d).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })
 
-export default function TransactionTable({ type, items, onDelete, loading }) {
+export default function TransactionTable({ type, items, onDelete, onEdit, loading }) {
   const isIncome   = type === 'income'
   const label      = isIncome ? 'Доходы' : 'Расходы'
   const colorClass = isIncome ? 'text-income' : 'text-expense'
@@ -65,14 +65,24 @@ export default function TransactionTable({ type, items, onDelete, loading }) {
                     {item.description || '—'}
                   </td>
                   <td className="py-2 px-1">
-                    <button
-                      onClick={() => setConfirmId(item.id)}
-                      className="w-7 h-7 flex items-center justify-center rounded-lg text-muted
-                                 hover:bg-expense/20 hover:text-expense transition-colors"
-                      title="Удалить"
-                    >
-                      <i className="fa-solid fa-trash-can text-xs" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => onEdit(item)}
+                        className="w-7 h-7 flex items-center justify-center rounded-lg text-muted
+                                   hover:bg-secondary/20 hover:text-primary transition-colors"
+                        title="Редактировать"
+                      >
+                        <i className="fa-solid fa-pen text-xs" />
+                      </button>
+                      <button
+                        onClick={() => setConfirmId(item.id)}
+                        className="w-7 h-7 flex items-center justify-center rounded-lg text-muted
+                                   hover:bg-expense/20 hover:text-expense transition-colors"
+                        title="Удалить"
+                      >
+                        <i className="fa-solid fa-trash-can text-xs" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

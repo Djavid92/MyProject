@@ -1,16 +1,31 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Modal from '../ui/Modal.jsx'
 
 const today = () => new Date().toISOString().split('T')[0]
 
 const empty = () => ({ name: '', categoryId: '', amount: '', description: '', date: today() })
 
-export default function AddTransactionModal({ type, open, onClose, categories, onSubmit, onAddCategory }) {
+export default function AddTransactionModal({ type, open, onClose, categories, onSubmit, onAddCategory, editItem, onUpdate }) {
   const isIncome  = type === 'income'
+  const isEdit    = !!editItem
   const [form, setForm]               = useState(empty())
   const [loading, setLoading]         = useState(false)
   const [error, setError]             = useState('')
   const [success, setSuccess]         = useState(false)
+
+  useEffect(() => {
+    if (editItem) {
+      setForm({
+        name:        editItem.name        ?? '',
+        categoryId:  editItem.category?.id ? String(editItem.category.id) : '',
+        amount:      editItem.amount      ?? '',
+        description: editItem.description ?? '',
+        date:        editItem.date        ?? today(),
+      })
+      setError('')
+      setSuccess(false)
+    }
+  }, [editItem])
 
   // inline new-category state
   const [showNewCat, setShowNewCat]   = useState(false)
@@ -51,19 +66,27 @@ export default function AddTransactionModal({ type, open, onClose, categories, o
     if (Number(form.amount) <= 0) return setError('Сумма должна быть больше 0')
     if (!form.date)               return setError('Выберите дату')
 
+    const dto = {
+      name:        form.name.trim(),
+      categoryId:  form.categoryId ? Number(form.categoryId) : null,
+      amount:      Number(form.amount),
+      description: form.description.trim(),
+      date:        form.date,
+    }
+
     setLoading(true)
     try {
-      await onSubmit({
-        name:        form.name.trim(),
-        categoryId:  form.categoryId ? Number(form.categoryId) : null,
-        amount:      Number(form.amount),
-        description: form.description.trim(),
-        date:        form.date,
-      })
-      setForm(f => ({ ...empty(), categoryId: f.categoryId, date: f.date }))
+      if (isEdit) {
+        await onUpdate(editItem.id, dto)
+        setSuccess(true)
+        setTimeout(() => { setSuccess(false); onClose() }, 1000)
+      } else {
+        await onSubmit(dto)
+        setForm(f => ({ ...empty(), categoryId: f.categoryId, date: f.date }))
+        setSuccess(true)
+        setTimeout(() => setSuccess(false), 2000)
+      }
       setError('')
-      setSuccess(true)
-      setTimeout(() => setSuccess(false), 2000)
     } catch (err) {
       setError(err?.response?.data?.message ?? 'Произошла ошибка')
     } finally {
@@ -71,8 +94,12 @@ export default function AddTransactionModal({ type, open, onClose, categories, o
     }
   }
 
+  const title = isEdit
+    ? (isIncome ? 'Редактировать доход' : 'Редактировать расход')
+    : (isIncome ? 'Добавить доход'      : 'Добавить расход')
+
   return (
-    <Modal open={open} onClose={handleClose} title={isIncome ? 'Добавить доход' : 'Добавить расход'}>
+    <Modal open={open} onClose={handleClose} title={title}>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Name */}
         <div>
@@ -191,7 +218,8 @@ export default function AddTransactionModal({ type, open, onClose, categories, o
 
         {success && (
           <p className="text-sm text-income flex items-center gap-1.5">
-            <i className="fa-solid fa-circle-check" /> {isIncome ? 'Доход добавлен!' : 'Расход добавлен!'}
+            <i className="fa-solid fa-circle-check" />
+            {isEdit ? 'Изменения сохранены!' : (isIncome ? 'Доход добавлен!' : 'Расход добавлен!')}
           </p>
         )}
 
@@ -203,7 +231,7 @@ export default function AddTransactionModal({ type, open, onClose, categories, o
             className={isIncome ? 'btn-income' : 'btn-expense'}
           >
             {loading && <i className="fa-solid fa-spinner animate-spin" />}
-            {isIncome ? 'Добавить доход' : 'Добавить расход'}
+            {isEdit ? 'Сохранить' : (isIncome ? 'Добавить доход' : 'Добавить расход')}
           </button>
         </div>
       </form>

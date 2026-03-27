@@ -21,8 +21,10 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @WebMvcTest(FinanceController.class)
@@ -151,19 +153,83 @@ class FinanceControllerTest {
         verify(expenseService).addExpense(any());
     }
 
-    // 🔹 6. DELETE /delete/all
+    // 🔹 6. PUT /incomes/{id}
 
     @Test
-    void deleteAll_shouldCallBothServices() throws Exception {
-        mockMvc.perform(delete("/api/dashboard/delete/all"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Все успешно удалилось"));
+    void updateIncome_shouldReturn204_ifUpdated() throws Exception {
+        String json = """
+                {
+                  "amount": 150,
+                  "date": "2024-03-10",
+                  "categoryId": 1
+                }
+                """;
 
-        verify(incomeService).deleteAll();
-        verify(expenseService).deleteAll();
+        when(incomeService.updateIncome(eq(1L), any())).thenReturn(true);
+
+        mockMvc.perform(put("/api/dashboard/incomes/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isNoContent());
     }
 
-    // 🔹 7. DELETE /incomes/{id}
+    @Test
+    void updateIncome_shouldReturn404_ifNotFound() throws Exception {
+        String json = """
+                {
+                  "amount": 150,
+                  "date": "2024-03-10",
+                  "categoryId": 1
+                }
+                """;
+
+        when(incomeService.updateIncome(eq(1L), any())).thenReturn(false);
+
+        mockMvc.perform(put("/api/dashboard/incomes/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isNotFound());
+    }
+
+    // 🔹 7. PUT /expenses/{id}
+
+    @Test
+    void updateExpense_shouldReturn204_ifUpdated() throws Exception {
+        String json = """
+                {
+                  "amount": 250,
+                  "date": "2024-03-10",
+                  "categoryId": 1
+                }
+                """;
+
+        when(expenseService.updateExpense(eq(1L), any())).thenReturn(true);
+
+        mockMvc.perform(put("/api/dashboard/expenses/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void updateExpense_shouldReturn404_ifNotFound() throws Exception {
+        String json = """
+                {
+                  "amount": 250,
+                  "date": "2024-03-10",
+                  "categoryId": 1
+                }
+                """;
+
+        when(expenseService.updateExpense(eq(1L), any())).thenReturn(false);
+
+        mockMvc.perform(put("/api/dashboard/expenses/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isNotFound());
+    }
+
+    // 🔹 8. DELETE /incomes/{id}
 
     @Test
     void deleteIncome_shouldReturn204_ifDeleted() throws Exception {

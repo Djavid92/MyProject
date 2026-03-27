@@ -87,9 +87,49 @@ class IncomeCommandServiceTest {
     }
 
     @Test
-    void deleteAll_shouldCallRepository() {
-        service.deleteAll();
+    void update_shouldUpdateAndReturnTrue_ifExists() {
+        Income existing = new Income();
+        IncomeDto dto = new IncomeDto();
+        dto.setCategoryId(1L);
+        dto.setDate(LocalDate.now());
+        dto.setAmount(BigDecimal.valueOf(200));
+        dto.setName("Updated");
 
-        verify(incomeRepository).deleteAll();
+        when(incomeRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(new Category()));
+
+        boolean result = service.update(1L, dto);
+
+        assertTrue(result);
+        verify(incomeRepository).save(existing);
     }
+
+    @Test
+    void update_shouldReturnFalse_ifNotExists() {
+        IncomeDto dto = new IncomeDto();
+        dto.setCategoryId(1L);
+        dto.setDate(LocalDate.now());
+        dto.setAmount(BigDecimal.TEN);
+
+        when(incomeRepository.findById(1L)).thenReturn(Optional.empty());
+
+        boolean result = service.update(1L, dto);
+
+        assertFalse(result);
+        verify(incomeRepository, never()).save(any());
+    }
+
+    @Test
+    void update_shouldThrowException_ifCategoryNotFound() {
+        IncomeDto dto = new IncomeDto();
+        dto.setCategoryId(1L);
+        dto.setDate(LocalDate.now());
+        dto.setAmount(BigDecimal.TEN);
+
+        when(incomeRepository.findById(1L)).thenReturn(Optional.of(new Income()));
+        when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> service.update(1L, dto));
+    }
+
 }

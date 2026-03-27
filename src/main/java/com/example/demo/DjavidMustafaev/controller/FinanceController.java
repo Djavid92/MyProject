@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -94,7 +95,7 @@ public class FinanceController {
                     "и сохраняет в базу"
     )
     @PostMapping("/addIncome") // добавление дохода
-    public ResponseEntity<String> addIncome(@RequestBody IncomeDto incomeDto) {
+    public ResponseEntity<String> addIncome(@Valid @RequestBody IncomeDto incomeDto) {
         financeFacadeIncome.addIncome(incomeDto);
         return ResponseEntity.status(201).body("Доход успешно добавлен");
     }
@@ -106,20 +107,24 @@ public class FinanceController {
                     "и сохраняет в базу"
     )
     @PostMapping("/addExpense") // добавление расхода
-    public ResponseEntity<String> addExpense(@RequestBody ExpenseDto expenseDto) {
+    public ResponseEntity<String> addExpense(@Valid @RequestBody ExpenseDto expenseDto) {
         financeFacadeExpense.addExpense(expenseDto);
         return ResponseEntity.status(201).body("Расход успешно добавлен");
     }
 
     @Operation(
-            summary = "Удаление всех операций",
-            description = "Удаление доходов и расходов из базы данных за все периоды"
+            summary = "Обновление дохода",
+            description = "Обновляет существующий доход по id"
     )
-    @DeleteMapping("/delete/all") // удалить все
-    public ResponseEntity<String> deleteAll() {
-        financeFacadeIncome.deleteAll();
-        financeFacadeExpense.deleteAll();
-        return ResponseEntity.ok("Все успешно удалилось");
+    @PutMapping("/incomes/{id}")
+    public ResponseEntity<Void> updateIncomeOperation(@PathVariable("id") Long id,
+                                                      @Valid @RequestBody IncomeDto incomeDto) {
+        boolean updated = financeFacadeIncome.updateIncome(id, incomeDto);
+        if (updated) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @Operation(
@@ -130,6 +135,21 @@ public class FinanceController {
     public ResponseEntity<Void> deleteIncomeOperation(@PathVariable("id") Long id) {
         boolean deleted = financeFacadeIncome.deleteIncome(id);
         if (deleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @Operation(
+            summary = "Обновление расхода",
+            description = "Обновляет существующий расход по id"
+    )
+    @PutMapping("/expenses/{id}")
+    public ResponseEntity<Void> updateExpenseOperation(@PathVariable("id") Long id,
+                                                       @Valid @RequestBody ExpenseDto expenseDto) {
+        boolean updated = financeFacadeExpense.updateExpense(id, expenseDto);
+        if (updated) {
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();

@@ -18,16 +18,17 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Slf4j
 public class ExpenseCommandService {
     private final ExpenseRepository expenseRepository;
     private final CategoryRepository categoryRepository;
 
 
+    @Transactional
     @Caching(evict = {
             @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_VALUE, allEntries = true),
-            @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_TOTAL_FOR_YEAR_MONTH_VALUE, allEntries = true),
+            @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_TOTAL_FOR_YEAR_MONTH_VALUE,
+                    key = "#dto.date.year + '::' + #dto.date.monthValue"),
             @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_TOTAL_FOR_CURRENT_MONTH_VALUE, allEntries = true)})
     public void save(@NotNull ExpenseDto dto) {
         Util.isAfterToday(dto.getDate());
@@ -43,6 +44,28 @@ public class ExpenseCommandService {
         expenseRepository.save(expense);
     }
 
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_VALUE, allEntries = true),
+            @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_TOTAL_FOR_YEAR_MONTH_VALUE,
+                    key = "#dto.date.year + '::' + #dto.date.monthValue"),
+            @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_TOTAL_FOR_CURRENT_MONTH_VALUE, allEntries = true)})
+    public boolean update(Long id, @NotNull ExpenseDto dto) {
+        return expenseRepository.findById(id).map(expense -> {
+            Util.isAfterToday(dto.getDate());
+            Category category = categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new IllegalArgumentException("Категория не найдена"));
+            expense.setName(dto.getName());
+            expense.setCategory(category);
+            expense.setAmount(dto.getAmount());
+            expense.setDescription(dto.getDescription());
+            expense.setDate(dto.getDate());
+            expenseRepository.save(expense);
+            return true;
+        }).orElse(false);
+    }
+
+    @Transactional
     @Caching(evict = {
             @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_VALUE, allEntries = true),
             @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_TOTAL_FOR_YEAR_MONTH_VALUE, allEntries = true),
@@ -53,13 +76,4 @@ public class ExpenseCommandService {
         return expenseOptional.isPresent();
     }
 
-    @Caching(evict ={
-            @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_VALUE, allEntries = true),
-            @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_TOTAL_FOR_YEAR_MONTH_VALUE, allEntries = true),
-            @CacheEvict(value = ExpenseQueryService.CACHEABLE_EXPENSES_TOTAL_FOR_CURRENT_MONTH_VALUE, allEntries = true)
-
-    })
-    public void deleteAll() {
-        expenseRepository.deleteAll();
-    }
 }

@@ -37,16 +37,17 @@ public class FinanceFacadeIncome {
         incomeCmd.save(dto);
     }
 
+    // обновить доход
+    @Transactional
+    public boolean updateIncome(Long id, IncomeDto dto) {
+        return incomeCmd.update(id, dto);
+    }
+
     // удалить доход
     @Transactional
     public boolean deleteIncome(Long id) {
         return incomeCmd.delete(id);
     }
 
-    // удалить всё
-    @Transactional
-    public void deleteAll() {
-        incomeCmd.deleteAll();
-    }
 
 }

@@ -88,9 +88,49 @@ class ExpenseCommandServiceTest {
     }
 
     @Test
-    void deleteAll_shouldCallRepository() {
-        service.deleteAll();
+    void update_shouldUpdateAndReturnTrue_ifExists() {
+        Expense existing = new Expense();
+        ExpenseDto dto = new ExpenseDto();
+        dto.setCategoryId(1L);
+        dto.setDate(LocalDate.now());
+        dto.setAmount(BigDecimal.valueOf(300));
+        dto.setName("Updated");
 
-        verify(expenseRepository).deleteAll();
+        when(expenseRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(new Category()));
+
+        boolean result = service.update(1L, dto);
+
+        assertTrue(result);
+        verify(expenseRepository).save(existing);
     }
+
+    @Test
+    void update_shouldReturnFalse_ifNotExists() {
+        ExpenseDto dto = new ExpenseDto();
+        dto.setCategoryId(1L);
+        dto.setDate(LocalDate.now());
+        dto.setAmount(BigDecimal.TEN);
+
+        when(expenseRepository.findById(1L)).thenReturn(Optional.empty());
+
+        boolean result = service.update(1L, dto);
+
+        assertFalse(result);
+        verify(expenseRepository, never()).save(any());
+    }
+
+    @Test
+    void update_shouldThrowException_ifCategoryNotFound() {
+        ExpenseDto dto = new ExpenseDto();
+        dto.setCategoryId(1L);
+        dto.setDate(LocalDate.now());
+        dto.setAmount(BigDecimal.TEN);
+
+        when(expenseRepository.findById(1L)).thenReturn(Optional.of(new Expense()));
+        when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> service.update(1L, dto));
+    }
+
 }

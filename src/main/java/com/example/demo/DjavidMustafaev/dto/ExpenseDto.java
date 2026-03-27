@@ -24,7 +24,7 @@ public class ExpenseDto {
     private Long id;
 
     @Size(max = 100, message = "Название должно быть не больше 100 символов")
-    public String name;
+    private String name;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private CategoryDto category;

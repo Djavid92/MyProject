@@ -38,15 +38,15 @@ public class FinanceFacadeExpense {
         expenseCmd.save(dto);
     }
 
+    // обновить расход
+    @Transactional
+    public boolean updateExpense(Long id, ExpenseDto dto) {
+        return expenseCmd.update(id, dto);
+    }
+
     // удалить расход
     @Transactional
     public boolean deleteExpense(Long id) {
         return expenseCmd.delete(id);
-    }
-
-    // удалить всё
-    @Transactional
-    public void deleteAll() {
-        expenseCmd.deleteAll();
     }
 }

@@ -17,12 +17,18 @@ export const getOperationsByMonth = (year, month) =>
 export const addIncome = (dto) =>
   api.post('/addIncome', dto).then(r => r.data)
 
+export const updateIncome = (id, dto) =>
+  api.put(`/incomes/${id}`, dto)
+
 export const deleteIncome = (id) =>
   api.delete(`/incomes/${id}`)
 
 // ── Expense ────────────────────────────────────────────────────────────────
 export const addExpense = (dto) =>
   api.post('/addExpense', dto).then(r => r.data)
+
+export const updateExpense = (id, dto) =>
+  api.put(`/expenses/${id}`, dto)
 
 export const deleteExpense = (id) =>
   api.delete(`/expenses/${id}`)
@@ -37,6 +43,3 @@ export const addCategory = (dto) =>
 export const deleteCategory = (id) =>
   api.delete(`/category/${id}`)
 
-// ── Destructive ────────────────────────────────────────────────────────────
-export const deleteAll = () =>
-  api.delete('/delete/all')

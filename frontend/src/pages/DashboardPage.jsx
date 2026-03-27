@@ -2,9 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   getTotalsByMonth, getOperationsByMonth,
   getCategories, addCategory, deleteCategory,
-  addIncome, deleteIncome,
-  addExpense, deleteExpense,
-  deleteAll,
+  addIncome, updateIncome, deleteIncome,
+  addExpense, updateExpense, deleteExpense,
 } from '../api/financeApi.js'
 
 import StatsCards         from '../components/dashboard/StatsCards.jsx'
@@ -14,7 +13,6 @@ import AddTransactionModal from '../components/dashboard/AddTransactionModal.jsx
 import CategoryManager    from '../components/dashboard/CategoryManager.jsx'
 import MonthSelector      from '../components/dashboard/MonthSelector.jsx'
 import NotificationContainer from '../components/ui/NotificationContainer.jsx'
-import ConfirmDialog      from '../components/ui/ConfirmDialog.jsx'
 import { useNotification } from '../hooks/useNotification.js'
 
 function currentPeriod() {
@@ -34,9 +32,9 @@ export default function DashboardPage() {
   const [loadingOps, setLoadingOps]   = useState(false)
   const [loadingCats, setLoadingCats] = useState(false)
 
-  const [modal, setModal]       = useState(null) // 'income' | 'expense' | null
-  const [showDeleteAll, setDA]  = useState(false)
-  const [activeTab, setTab]     = useState('income') // 'income' | 'expense' | 'categories'
+  const [modal, setModal]         = useState(null)  // 'income' | 'expense' | null
+  const [editItem, setEditItem]   = useState(null)  // { type: 'income'|'expense', item }
+  const [activeTab, setTab]       = useState('income') // 'income' | 'expense' | 'categories'
 
   // ── Fetch data ────────────────────────────────────────────────────────────
   const fetchOps = useCallback(async () => {
@@ -105,9 +103,16 @@ export default function DashboardPage() {
     catch { notify('Не удалось удалить категорию', 'error') }
   }
 
-  const handleDeleteAll = async () => {
-    try { await deleteAll(); notify('Все записи удалены', 'info'); fetchOps() }
-    catch { notify('Не удалось удалить записи', 'error') }
+  const handleUpdateIncome = async (id, dto) => {
+    await updateIncome(id, dto)
+    notify('Доход обновлён', 'success')
+    fetchOps()
+  }
+
+  const handleUpdateExpense = async (id, dto) => {
+    await updateExpense(id, dto)
+    notify('Расход обновлён', 'success')
+    fetchOps()
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -170,13 +175,6 @@ export default function DashboardPage() {
             </button>
           ))}
 
-          {/* Delete all */}
-          <button
-            onClick={() => setDA(true)}
-            className="ml-auto flex items-center gap-1.5 px-4 py-3 text-xs text-muted hover:text-expense transition-colors"
-          >
-            <i className="fa-solid fa-trash" /> Очистить всё
-          </button>
         </div>
 
         {/* Tab content */}
@@ -186,6 +184,7 @@ export default function DashboardPage() {
               type="income"
               items={incomes}
               onDelete={handleDeleteIncome}
+              onEdit={(item) => setEditItem({ type: 'income', item })}
               loading={loadingOps}
             />
           )}
@@ -194,6 +193,7 @@ export default function DashboardPage() {
               type="expense"
               items={expenses}
               onDelete={handleDeleteExpense}
+              onEdit={(item) => setEditItem({ type: 'expense', item })}
               loading={loadingOps}
             />
           )}
@@ -208,7 +208,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Modals */}
+      {/* Modals — добавление */}
       <AddTransactionModal
         type="income"
         open={modal === 'income'}
@@ -225,13 +225,25 @@ export default function DashboardPage() {
         onSubmit={handleAddExpense}
         onAddCategory={handleAddCategory}
       />
-      <ConfirmDialog
-        open={showDeleteAll}
-        onClose={() => setDA(false)}
-        onConfirm={handleDeleteAll}
-        title="Удалить все записи"
-        message="Это удалит ВСЕ доходы и расходы навсегда. Действие нельзя отменить."
-        danger
+
+      {/* Modals — редактирование */}
+      <AddTransactionModal
+        type="income"
+        open={editItem?.type === 'income'}
+        onClose={() => setEditItem(null)}
+        categories={categories}
+        onAddCategory={handleAddCategory}
+        editItem={editItem?.item}
+        onUpdate={handleUpdateIncome}
+      />
+      <AddTransactionModal
+        type="expense"
+        open={editItem?.type === 'expense'}
+        onClose={() => setEditItem(null)}
+        categories={categories}
+        onAddCategory={handleAddCategory}
+        editItem={editItem?.item}
+        onUpdate={handleUpdateExpense}
       />
     </>
   )

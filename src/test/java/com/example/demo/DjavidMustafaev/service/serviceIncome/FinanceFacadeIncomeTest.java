@@ -63,6 +63,17 @@ class FinanceFacadeIncomeTest {
     }
 
     @Test
+    void updateIncome_shouldReturnResultFromCommand() {
+        IncomeDto dto = new IncomeDto();
+        when(incomeCmd.update(1L, dto)).thenReturn(true);
+
+        boolean result = facade.updateIncome(1L, dto);
+
+        assertTrue(result);
+        verify(incomeCmd).update(1L, dto);
+    }
+
+    @Test
     void deleteIncome_shouldReturnResultFromCommand() {
         when(incomeCmd.delete(1L)).thenReturn(true);
 
@@ -72,10 +83,4 @@ class FinanceFacadeIncomeTest {
         verify(incomeCmd).delete(1L);
     }
 
-    @Test
-    void deleteAll_shouldCallCommand() {
-        facade.deleteAll();
-
-        verify(incomeCmd).deleteAll();
-    }
 }
