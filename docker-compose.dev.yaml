@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # PostgreSQL для локальной разработки
+  postgres-dev:
+    image: postgres:14
+    container_name: postgres-dev
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: djavid
+      POSTGRES_PASSWORD: djavid
+    ports:
+      - "5434:5432"  # Другой порт, чтобы не конфликтовать
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Redis для локальной разработки
+  redis-dev:
+    image: redis:7-alpine
+    container_name: redis-dev
+    ports:
+      - "6380:6379"  # Другой порт
+    volumes:
+      - redis_dev_data:/data
+    restart: unless-stopped
+
+volumes:
+  postgres_dev_data:
+  redis_dev_data:

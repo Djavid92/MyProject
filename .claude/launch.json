@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Spring Boot App",
+      "runtimeExecutable": "./mvnw",
+      "runtimeArgs": ["spring-boot:run"],
+      "port": 8080
+    },
+    {
+      "name": "Dev Infrastructure (PostgreSQL + Redis)",
+      "runtimeExecutable": "docker",
+      "runtimeArgs": ["compose", "-f", "docker-compose.dev.yaml", "up"],
+      "port": 5434
+    },
+    {
+      "name": "Monitoring (Prometheus + Grafana)",
+      "runtimeExecutable": "docker",
+      "runtimeArgs": ["compose", "-f", "docker-compose.prometheus.yaml", "up"],
+      "port": 3000
+    }
+  ]
+}

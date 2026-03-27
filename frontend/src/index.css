@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-bg text-primary font-sans;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 cursor-pointer inline-flex items-center gap-2 text-sm;
+  }
+  .btn-primary {
+    @apply btn bg-primary text-surface hover:bg-opacity-90 active:scale-95;
+  }
+  .btn-income {
+    @apply btn bg-income text-white hover:opacity-90 active:scale-95;
+  }
+  .btn-expense {
+    @apply btn bg-expense text-white hover:opacity-90 active:scale-95;
+  }
+  .btn-secondary {
+    @apply btn bg-secondary text-white hover:opacity-90 active:scale-95;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent border border-secondary text-secondary hover:bg-secondary hover:text-white;
+  }
+  .btn-danger {
+    @apply btn bg-red-600 text-white hover:bg-red-700 active:scale-95;
+  }
+  .card {
+    @apply bg-surface rounded-2xl shadow-sm border border-secondary/20 p-5;
+  }
+  .input {
+    @apply w-full px-3 py-2 rounded-lg border border-secondary/40 bg-white/60
+           focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary
+           text-primary placeholder-muted text-sm transition-all;
+  }
+  .label {
+    @apply block text-sm font-medium text-muted mb-1;
+  }
+  .badge-income {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-income/20 text-income;
+  }
+  .badge-expense {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-expense/20 text-expense;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { @apply bg-secondary/40 rounded-full; }
+::-webkit-scrollbar-thumb:hover { @apply bg-secondary/70; }
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fadeIn 0.25s ease-out; }
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-down { animation: slideDown 0.2s ease-out; }

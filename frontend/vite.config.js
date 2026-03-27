@@ -1,0 +1,21 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig(({ command }) => ({
+  plugins: [react()],
+  // В продакшене ассеты публикуются по пути /react/
+  base: command === 'build' ? '/react/' : '/',
+  server: {
+    port: 3000,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+      },
+    },
+  },
+  build: {
+    outDir: '../src/main/resources/static/react',
+    emptyOutDir: true,
+  },
+}))

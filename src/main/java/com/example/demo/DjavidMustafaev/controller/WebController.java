@@ -6,14 +6,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class WebController {
 
-    @GetMapping("/")
-    public String index() {
-        return "forward:/index.html";
-    }
-
-    @GetMapping("/dashboard")
-    public String dashboard() {
-        return "forward:/dashboard.html";
+    // Все UI-маршруты отдаём React-приложению
+    @GetMapping(value = {"/", "/dashboard"})
+    public String reactApp() {
+        return "forward:/react/index.html";
     }
 
 }
