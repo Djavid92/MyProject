@@ -3,8 +3,8 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
-const INCOME_COLORS  = ['#B88D6A','#C9A882','#DAC39A','#9D7855','#8A6642','#EBDEC2']
-const EXPENSE_COLORS = ['#A05035','#B86040','#CC7050','#8A4025','#7A3020','#D08070']
+const INCOME_COLORS  = ['#BCB893','#6A6944','#474329','#768064','#B7B48A','#4C583E']
+const EXPENSE_COLORS = ['#E19184','#D66957','#964D50','#76181E','#743014','#640606']
 
 function buildChartData(items, colors) {
   if (!items?.length) return null

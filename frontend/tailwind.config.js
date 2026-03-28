@@ -6,7 +6,7 @@ export default {
       colors: {
         primary:   '#3F3F2C',
         secondary: '#9D9167',
-        income:    '#B88D6A',
+        income:    '#6B7C3A',
         expense:   '#A05035',
         bg:        '#CEC1A8',
         surface:   '#E8DFCF',

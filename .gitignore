@@ -37,7 +37,7 @@ build/
 **/.DS_Store
 
 ### Project ###
-backup.sql
+backups/
 
 ### Claude worktrees ###
 **/.claude/worktrees/

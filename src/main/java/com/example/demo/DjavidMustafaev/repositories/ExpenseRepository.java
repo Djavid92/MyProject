@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
-    @Query("select i from Expense i where i.date >= :startDate and i.date <= :endDate")
+    @Query("select i from Expense i join fetch i.category where i.date >= :startDate and i.date <= :endDate")
     List<Expense> findExpenseByDateRange(@Param("startDate")LocalDate startDate, @Param("endDate")LocalDate endDate);
     // сумма между датами (включительно)
     @Query("select cast(coalesce(sum(e.amount), 0) as java.math.BigDecimal) " +
