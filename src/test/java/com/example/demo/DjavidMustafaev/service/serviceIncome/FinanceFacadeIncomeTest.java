@@ -54,6 +54,16 @@ class FinanceFacadeIncomeTest {
     }
 
     @Test
+    void totalIncomeForCurrentMonth_shouldDelegate() {
+        when(incomeQuery.totalForCurrentMonth()).thenReturn(BigDecimal.valueOf(3500));
+
+        BigDecimal result = facade.totalIncomeForCurrentMonth();
+
+        assertEquals(BigDecimal.valueOf(3500), result);
+        verify(incomeQuery).totalForCurrentMonth();
+    }
+
+    @Test
     void addIncome_shouldCallCommandService() {
         IncomeDto dto = new IncomeDto();
 
