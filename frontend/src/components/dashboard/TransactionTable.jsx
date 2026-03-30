@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import ConfirmDialog from '../ui/ConfirmDialog.jsx'
 
-const LIMIT = 10
+export const PAGE_SIZE = 10
 
 const fmt = (n) =>
   new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(n)
@@ -9,7 +9,7 @@ const fmt = (n) =>
 const fmtDate = (d) =>
   new Date(d).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })
 
-export default function TransactionTable({ type, items, onDelete, onEdit, loading }) {
+export default function TransactionTable({ type, items, onDelete, onEdit, loading, page }) {
   const isIncome   = type === 'income'
   const label      = isIncome ? 'Доходы' : 'Расходы'
   const colorClass = isIncome ? 'text-income' : 'text-expense'
@@ -17,11 +17,10 @@ export default function TransactionTable({ type, items, onDelete, onEdit, loadin
   const icon       = isIncome ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'
 
   const [confirmId, setConfirmId] = useState(null)
-  const [expanded, setExpanded]   = useState(false)
 
   const sorted  = [...(items ?? [])].sort((a, b) => new Date(b.date) - new Date(a.date))
-  const visible = expanded ? sorted : sorted.slice(0, LIMIT)
-  const hasMore = sorted.length > LIMIT
+  const start   = (page - 1) * PAGE_SIZE
+  const visible = sorted.slice(start, start + PAGE_SIZE)
 
   return (
     <div className="card">
@@ -39,78 +38,61 @@ export default function TransactionTable({ type, items, onDelete, onEdit, loadin
       ) : !items?.length ? (
         <Empty />
       ) : (
-        <>
-          <div className="overflow-x-auto -mx-1">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-xs text-muted uppercase tracking-wide border-b border-secondary/20">
-                  <th className="pb-2 px-1 font-medium">Название</th>
-                  <th className="pb-2 px-1 font-medium">Категория</th>
-                  <th className="pb-2 px-1 font-medium">Сумма</th>
-                  <th className="pb-2 px-1 font-medium">Дата</th>
-                  <th className="pb-2 px-1 font-medium">Описание</th>
-                  <th className="pb-2 px-1" />
+        <div className="overflow-x-auto -mx-1">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-xs text-muted uppercase tracking-wide border-b border-secondary/20">
+                <th className="pb-2 px-1 font-medium">Название</th>
+                <th className="pb-2 px-1 font-medium">Категория</th>
+                <th className="pb-2 px-1 font-medium">Сумма</th>
+                <th className="pb-2 px-1 font-medium">Дата</th>
+                <th className="pb-2 px-1 font-medium">Описание</th>
+                <th className="pb-2 px-1" />
+              </tr>
+            </thead>
+            <tbody>
+              {visible.map((item, i) => (
+                <tr
+                  key={item.id}
+                  className={`border-b border-secondary/10 hover:bg-secondary/5 transition-colors
+                    ${i % 2 !== 0 ? 'bg-secondary/5' : ''}`}
+                >
+                  <td className="py-2 px-1 font-medium text-primary">{item.name}</td>
+                  <td className="py-2 px-1">
+                    <span className={badgeClass}>{item.category?.name ?? '—'}</span>
+                  </td>
+                  <td className={`py-2 px-1 font-semibold ${colorClass}`}>
+                    {isIncome ? '+' : '−'}{fmt(item.amount)}
+                  </td>
+                  <td className="py-2 px-1 text-muted">{fmtDate(item.date)}</td>
+                  <td className="py-2 px-1 text-muted max-w-[150px] truncate">
+                    {item.description || '—'}
+                  </td>
+                  <td className="py-2 px-1">
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => onEdit(item)}
+                        className="w-7 h-7 flex items-center justify-center rounded-lg text-muted
+                                   hover:bg-secondary/20 hover:text-primary transition-colors"
+                        title="Редактировать"
+                      >
+                        <i className="fa-solid fa-pen text-xs" />
+                      </button>
+                      <button
+                        onClick={() => setConfirmId(item.id)}
+                        className="w-7 h-7 flex items-center justify-center rounded-lg text-muted
+                                   hover:bg-expense/20 hover:text-expense transition-colors"
+                        title="Удалить"
+                      >
+                        <i className="fa-solid fa-trash-can text-xs" />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {visible.map((item, i) => (
-                  <tr
-                    key={item.id}
-                    className={`border-b border-secondary/10 hover:bg-secondary/5 transition-colors
-                      ${i % 2 === 0 ? '' : 'bg-secondary/5'}`}
-                  >
-                    <td className="py-2 px-1 font-medium text-primary">{item.name}</td>
-                    <td className="py-2 px-1">
-                      <span className={badgeClass}>
-                        {item.category?.name ?? '—'}
-                      </span>
-                    </td>
-                    <td className={`py-2 px-1 font-semibold ${colorClass}`}>
-                      {isIncome ? '+' : '−'}{fmt(item.amount)}
-                    </td>
-                    <td className="py-2 px-1 text-muted">{fmtDate(item.date)}</td>
-                    <td className="py-2 px-1 text-muted max-w-[150px] truncate">
-                      {item.description || '—'}
-                    </td>
-                    <td className="py-2 px-1">
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => onEdit(item)}
-                          className="w-7 h-7 flex items-center justify-center rounded-lg text-muted
-                                     hover:bg-secondary/20 hover:text-primary transition-colors"
-                          title="Редактировать"
-                        >
-                          <i className="fa-solid fa-pen text-xs" />
-                        </button>
-                        <button
-                          onClick={() => setConfirmId(item.id)}
-                          className="w-7 h-7 flex items-center justify-center rounded-lg text-muted
-                                     hover:bg-expense/20 hover:text-expense transition-colors"
-                          title="Удалить"
-                        >
-                          <i className="fa-solid fa-trash-can text-xs" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {hasMore && (
-            <button
-              onClick={() => setExpanded(v => !v)}
-              className="mt-3 w-full flex items-center justify-center gap-2 py-2 text-xs text-muted
-                         hover:text-primary hover:bg-secondary/10 rounded-lg transition-colors"
-            >
-              <i className={`fa-solid ${expanded ? 'fa-chevron-up' : 'fa-chevron-down'} text-[10px]`} />
-              {expanded
-                ? 'Скрыть'
-                : `Показать все (${sorted.length - LIMIT} ещё)`}
-            </button>
-          )}
-        </>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       <ConfirmDialog

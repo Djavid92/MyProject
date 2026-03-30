@@ -27,10 +27,7 @@ function buildChartData(items, colors) {
 
 const OPTIONS = {
   plugins: {
-    legend: {
-      position: 'bottom',
-      labels: { font: { size: 12 }, color: '#3F3F2C', padding: 12, boxWidth: 12 },
-    },
+    legend: { display: false },
     tooltip: {
       callbacks: {
         label: (ctx) => {
@@ -70,7 +67,7 @@ function ChartCard({ title, data, loading, empty }) {
           <p className="text-sm">Нет данных за этот месяц</p>
         </div>
       ) : (
-        <div className="h-52">
+        <div className="h-72">
           <Pie data={data} options={{ ...OPTIONS, maintainAspectRatio: false }} />
         </div>
       )}

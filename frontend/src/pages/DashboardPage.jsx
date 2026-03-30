@@ -8,7 +8,7 @@ import {
 
 import StatsCards         from '../components/dashboard/StatsCards.jsx'
 import CategoryPieChart   from '../components/dashboard/CategoryPieChart.jsx'
-import TransactionTable   from '../components/dashboard/TransactionTable.jsx'
+import TransactionTable, { PAGE_SIZE } from '../components/dashboard/TransactionTable.jsx'
 import AddTransactionModal from '../components/dashboard/AddTransactionModal.jsx'
 import CategoryManager    from '../components/dashboard/CategoryManager.jsx'
 import MonthSelector      from '../components/dashboard/MonthSelector.jsx'
@@ -35,6 +35,7 @@ export default function DashboardPage() {
   const [modal, setModal]         = useState(null)  // 'income' | 'expense' | null
   const [editItem, setEditItem]   = useState(null)  // { type: 'income'|'expense', item }
   const [activeTab, setTab]       = useState('income') // 'income' | 'expense' | 'categories'
+  const [page, setPage]           = useState(1)
 
   // ── Fetch data ────────────────────────────────────────────────────────────
   const fetchOps = useCallback(async () => {
@@ -47,6 +48,7 @@ export default function DashboardPage() {
       setTotals(t)
       setIncomes(ops.incomes ?? [])
       setExpenses(ops.expenses ?? [])
+      setPage(1)
     } catch {
       notify('Не удалось загрузить данные', 'error')
     } finally {
@@ -132,11 +134,27 @@ export default function DashboardPage() {
             month={period.month}
             onChange={(y, m) => setPeriod({ year: y, month: m })}
           />
-          <button className="btn-income" onClick={() => setModal('income')}>
-            <i className="fa-solid fa-plus" /> Доход
+          <button
+            onClick={() => setModal('income')}
+            className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-2xl
+                       bg-income text-white text-sm font-semibold
+                       shadow-sm hover:shadow-md hover:brightness-105 active:scale-95 transition-all"
+          >
+            <span className="w-5 h-5 flex items-center justify-center bg-white/20 rounded-lg">
+              <i className="fa-solid fa-plus text-xs" />
+            </span>
+            Доход
           </button>
-          <button className="btn-expense" onClick={() => setModal('expense')}>
-            <i className="fa-solid fa-minus" /> Расход
+          <button
+            onClick={() => setModal('expense')}
+            className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-2xl
+                       bg-expense text-white text-sm font-semibold
+                       shadow-sm hover:shadow-md hover:brightness-105 active:scale-95 transition-all"
+          >
+            <span className="w-5 h-5 flex items-center justify-center bg-white/20 rounded-lg">
+              <i className="fa-solid fa-minus text-xs" />
+            </span>
+            Расход
           </button>
         </div>
       </div>
@@ -154,7 +172,7 @@ export default function DashboardPage() {
       {/* Tabs */}
       <div className="card mb-0 p-0 overflow-hidden">
         {/* Tab bar */}
-        <div className="flex border-b border-secondary/20 bg-surface">
+        <div className="flex items-center border-b border-secondary/20 bg-surface">
           {[
             { key: 'income',     label: 'Доходы',    icon: 'fa-arrow-trend-up',   count: incomes.length },
             { key: 'expense',    label: 'Расходы',   icon: 'fa-arrow-trend-down', count: expenses.length },
@@ -162,7 +180,7 @@ export default function DashboardPage() {
           ].map(tab => (
             <button
               key={tab.key}
-              onClick={() => setTab(tab.key)}
+              onClick={() => { setTab(tab.key); setPage(1) }}
               className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors
                 ${activeTab === tab.key
                   ? 'border-secondary text-primary'
@@ -175,6 +193,49 @@ export default function DashboardPage() {
             </button>
           ))}
 
+          {/* Pagination numbers */}
+          {(() => {
+            const list = activeTab === 'income' ? incomes : activeTab === 'expense' ? expenses : null
+            if (!list) return null
+            const total = Math.ceil(list.length / PAGE_SIZE)
+            if (total <= 1) return null
+
+            const pages = []
+            for (let p = 1; p <= total; p++) {
+              const showDot =
+                (p === 2 && page > 3) ||
+                (p === total - 1 && page < total - 2)
+              const show =
+                p === 1 || p === total ||
+                Math.abs(p - page) <= 1
+
+              if (showDot) { pages.push({ p, dot: true }); continue }
+              if (!show) continue
+              pages.push({ p, dot: false })
+            }
+
+            return (
+              <div className="ml-auto flex items-center gap-1 pr-3">
+                {pages.map(({ p, dot }) =>
+                  dot ? (
+                    <span key={`dot-${p}`} className="w-7 text-center text-xs text-muted select-none">…</span>
+                  ) : (
+                    <button
+                      key={p}
+                      onClick={() => setPage(p)}
+                      className={`w-7 h-7 text-xs rounded-lg font-medium transition-colors
+                        ${page === p
+                          ? 'bg-secondary text-white'
+                          : 'text-muted hover:bg-secondary/15 hover:text-primary'
+                        }`}
+                    >
+                      {p}
+                    </button>
+                  )
+                )}
+              </div>
+            )
+          })()}
         </div>
 
         {/* Tab content */}
@@ -186,6 +247,7 @@ export default function DashboardPage() {
               onDelete={handleDeleteIncome}
               onEdit={(item) => setEditItem({ type: 'income', item })}
               loading={loadingOps}
+              page={page}
             />
           )}
           {activeTab === 'expense' && (
@@ -195,6 +257,7 @@ export default function DashboardPage() {
               onDelete={handleDeleteExpense}
               onEdit={(item) => setEditItem({ type: 'expense', item })}
               loading={loadingOps}
+              page={page}
             />
           )}
           {activeTab === 'categories' && (

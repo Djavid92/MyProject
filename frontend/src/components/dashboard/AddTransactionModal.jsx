@@ -139,16 +139,19 @@ export default function AddTransactionModal({ type, open, onClose, categories, o
                 {showNewCat ? 'Отмена' : 'Новая'}
               </button>
             </div>
-            <select
-              className="input"
-              value={form.categoryId}
-              onChange={e => set('categoryId', e.target.value)}
-            >
-              <option value="">— без категории —</option>
-              {categories.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={form.categoryId}
+                onChange={e => set('categoryId', e.target.value)}
+                className="input appearance-none pr-7"
+              >
+                <option value="">— без категории —</option>
+                {categories.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+              <i className="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-muted text-xs pointer-events-none" />
+            </div>
           </div>
         </div>
 
