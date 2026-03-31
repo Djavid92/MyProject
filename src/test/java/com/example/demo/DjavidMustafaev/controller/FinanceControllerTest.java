@@ -61,6 +61,68 @@ class FinanceControllerTest {
         }
     }
 
+    // 🔹 0. GET /calculate
+
+    @Test
+    void calculate_shouldReturnSum() throws Exception {
+        mockMvc.perform(get("/api/dashboard/calculate")
+                        .param("first", "100")
+                        .param("second", "50")
+                        .param("operator", "+"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("150"));
+    }
+
+    @Test
+    void calculate_shouldReturnDifference() throws Exception {
+        mockMvc.perform(get("/api/dashboard/calculate")
+                        .param("first", "100")
+                        .param("second", "50")
+                        .param("operator", "-"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("50"));
+    }
+
+    @Test
+    void calculate_shouldReturnProduct() throws Exception {
+        mockMvc.perform(get("/api/dashboard/calculate")
+                        .param("first", "10")
+                        .param("second", "5")
+                        .param("operator", "*"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("50"));
+    }
+
+    @Test
+    void calculate_shouldReturnQuotient() throws Exception {
+        mockMvc.perform(get("/api/dashboard/calculate")
+                        .param("first", "100")
+                        .param("second", "4")
+                        .param("operator", "/"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("25.00"));
+    }
+
+    @Test
+    void calculate_shouldReturn400_onDivisionByZero() throws Exception {
+        mockMvc.perform(get("/api/dashboard/calculate")
+                        .param("first", "100")
+                        .param("second", "0")
+                        .param("operator", "/"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Деление на ноль"));
+    }
+
+    @Test
+    void calculate_shouldReturn400_onUnknownOperator() throws Exception {
+        mockMvc.perform(get("/api/dashboard/calculate")
+                        .param("first", "100")
+                        .param("second", "50")
+                        .param("operator", "%"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
+    }
+
     // 🔹 1. GET /totals
 
     @Test

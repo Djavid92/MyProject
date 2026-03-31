@@ -1,8 +1,11 @@
 package com.example.demo.DjavidMustafaev.util;
 
+import com.example.demo.DjavidMustafaev.handler.BusinessException;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -74,6 +77,69 @@ class UtilTest {
         Map<String, LocalDate> result = Util.getStartAndEndDate(2025, 12);
         assertEquals(LocalDate.of(2025, 12, 1), result.get(Util.START_DATE_KEY));
         assertEquals(LocalDate.of(2025, 12, 31), result.get(Util.END_DATE_KEY));
+    }
+
+    // ── calculate ─────────────────────────────────────────────────────────────
+
+    @Test
+    void calculate_shouldAdd_twoNumbers() {
+        BigDecimal result = Util.calculate(List.of(new BigDecimal("100"), new BigDecimal("50")), '+');
+        assertEquals(new BigDecimal("150"), result);
+    }
+
+    @Test
+    void calculate_shouldAdd_multipleNumbers() {
+        BigDecimal result = Util.calculate(List.of(new BigDecimal("10"), new BigDecimal("20"), new BigDecimal("30")), '+');
+        assertEquals(new BigDecimal("60"), result);
+    }
+
+    @Test
+    void calculate_shouldSubtract() {
+        BigDecimal result = Util.calculate(List.of(new BigDecimal("100"), new BigDecimal("50")), '-');
+        assertEquals(new BigDecimal("50"), result);
+    }
+
+    @Test
+    void calculate_shouldSubtract_multipleNumbers() {
+        BigDecimal result = Util.calculate(List.of(new BigDecimal("100"), new BigDecimal("30"), new BigDecimal("20")), '-');
+        assertEquals(new BigDecimal("50"), result);
+    }
+
+    @Test
+    void calculate_shouldMultiply() {
+        BigDecimal result = Util.calculate(List.of(new BigDecimal("100"), new BigDecimal("50")), '*');
+        assertEquals(new BigDecimal("5000"), result);
+    }
+
+    @Test
+    void calculate_shouldMultiply_multipleNumbers() {
+        BigDecimal result = Util.calculate(List.of(new BigDecimal("2"), new BigDecimal("3"), new BigDecimal("4")), '*');
+        assertEquals(new BigDecimal("24"), result);
+    }
+
+    @Test
+    void calculate_shouldDivideWithScale2() {
+        BigDecimal result = Util.calculate(List.of(new BigDecimal("100"), new BigDecimal("3")), '/');
+        assertEquals(new BigDecimal("33.33"), result);
+    }
+
+    @Test
+    void calculate_shouldThrowArithmetic_onDivisionByZero() {
+        ArithmeticException ex = assertThrows(ArithmeticException.class,
+                () -> Util.calculate(List.of(new BigDecimal("100"), BigDecimal.ZERO), '/'));
+        assertEquals("Деление на ноль", ex.getMessage());
+    }
+
+    @Test
+    void calculate_shouldThrowBusinessException_onUnknownOperator() {
+        assertThrows(BusinessException.class,
+                () -> Util.calculate(List.of(new BigDecimal("100"), new BigDecimal("50")), '%'));
+    }
+
+    @Test
+    void calculate_shouldThrowBusinessException_onLessThanTwoNumbers() {
+        assertThrows(BusinessException.class,
+                () -> Util.calculate(List.of(new BigDecimal("100")), '+'));
     }
 
     @Test

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Modal from '../ui/Modal.jsx'
+import CalculatorModal from './CalculatorModal.jsx'
 
 const today = () => new Date().toISOString().split('T')[0]
 
@@ -8,10 +9,10 @@ const empty = () => ({ name: '', categoryId: '', amount: '', description: '', da
 export default function AddTransactionModal({ type, open, onClose, categories, onSubmit, onAddCategory, editItem, onUpdate }) {
   const isIncome  = type === 'income'
   const isEdit    = !!editItem
-  const [form, setForm]               = useState(empty())
-  const [loading, setLoading]         = useState(false)
-  const [error, setError]             = useState('')
-  const [success, setSuccess]         = useState(false)
+  const [form, setForm]       = useState(empty())
+  const [loading, setLoading] = useState(false)
+  const [error, setError]     = useState('')
+  const [success, setSuccess] = useState(false)
 
   useEffect(() => {
     if (editItem) {
@@ -28,14 +29,24 @@ export default function AddTransactionModal({ type, open, onClose, categories, o
   }, [editItem])
 
   // inline new-category state
-  const [showNewCat, setShowNewCat]   = useState(false)
-  const [newCatName, setNewCatName]   = useState('')
-  const [catLoading, setCatLoading]   = useState(false)
-  const [catError, setCatError]       = useState('')
+  const [showNewCat, setShowNewCat] = useState(false)
+  const [newCatName, setNewCatName] = useState('')
+  const [catLoading, setCatLoading] = useState(false)
+  const [catError, setCatError]     = useState('')
+
+  const [showCalc, setShowCalc] = useState(false)
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
-  const reset = () => { setForm(empty()); setError(''); setSuccess(false); setShowNewCat(false); setNewCatName(''); setCatError('') }
+  const reset = () => {
+    setForm(empty())
+    setError('')
+    setSuccess(false)
+    setShowNewCat(false)
+    setNewCatName('')
+    setCatError('')
+    setShowCalc(false)
+  }
 
   const handleClose = () => { reset(); onClose() }
 
@@ -47,7 +58,6 @@ export default function AddTransactionModal({ type, open, onClose, categories, o
     setCatLoading(true)
     try {
       const created = await onAddCategory({ name: trimmed })
-      // auto-select the newly created category
       if (created?.id) set('categoryId', String(created.id))
       setNewCatName('')
       setShowNewCat(false)
@@ -116,7 +126,9 @@ export default function AddTransactionModal({ type, open, onClose, categories, o
         {/* Amount + Category */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="label">Сумма, ₽ *</label>
+            <div className="flex items-center mb-1">
+              <label className="label !mb-0">Сумма, ₽ *</label>
+            </div>
             <input
               className="input"
               type="number"
@@ -226,7 +238,16 @@ export default function AddTransactionModal({ type, open, onClose, categories, o
           </p>
         )}
 
-        <div className="flex justify-end gap-3 pt-1">
+        <div className="flex items-center justify-between pt-1">
+          <button
+            type="button"
+            onClick={() => setShowCalc(true)}
+            className="w-10 h-10 flex items-center justify-center rounded-xl text-muted hover:text-primary hover:bg-secondary/20 transition-colors"
+            title="Открыть калькулятор"
+          >
+            <i className="fa-solid fa-calculator text-xl" />
+          </button>
+          <div className="flex gap-3">
           <button type="button" className="btn-ghost" onClick={handleClose}>Закрыть</button>
           <button
             type="submit"
@@ -236,8 +257,15 @@ export default function AddTransactionModal({ type, open, onClose, categories, o
             {loading && <i className="fa-solid fa-spinner animate-spin" />}
             {isEdit ? 'Сохранить' : (isIncome ? 'Добавить доход' : 'Добавить расход')}
           </button>
+          </div>
         </div>
       </form>
+
+      <CalculatorModal
+        open={showCalc}
+        onClose={() => setShowCalc(false)}
+        onApply={(value) => set('amount', value)}
+      />
     </Modal>
   )
 }

@@ -38,6 +38,12 @@ public class FinanceController {
     private final FinanceFacadeExpense financeFacadeExpense;
     private final CategoryService categoryService;
 
+    @GetMapping("/calculate")
+    public ResponseEntity<BigDecimal> calculate(@RequestParam List<BigDecimal> numbers,
+                                                @RequestParam char operator) {
+        return ResponseEntity.ok(Util.calculate(numbers, operator));
+    }
+
     @Operation(
             summary = "Получает общую сумму доходов и расходов за текущий месяц",
             description = "Содержит в себе 2 метода из сервиса которые принимают в качестве параметра текущую дату и"

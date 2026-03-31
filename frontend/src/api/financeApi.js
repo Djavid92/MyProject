@@ -33,6 +33,18 @@ export const updateExpense = (id, dto) =>
 export const deleteExpense = (id) =>
   api.delete(`/expenses/${id}`)
 
+// ── Calculator ─────────────────────────────────────────────────────────────
+export const calculate = (numbers, operator) =>
+  api.get('/calculate', {
+    params: { numbers, operator },
+    paramsSerializer: params => {
+      const p = new URLSearchParams()
+      params.numbers.forEach(n => p.append('numbers', n))
+      p.append('operator', params.operator)
+      return p.toString()
+    }
+  }).then(r => r.data)
+
 // ── Categories ─────────────────────────────────────────────────────────────
 export const getCategories = () =>
   api.get('/categories').then(r => r.data)
