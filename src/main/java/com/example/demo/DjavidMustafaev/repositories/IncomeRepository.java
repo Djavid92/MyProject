@@ -1,5 +1,6 @@
 package com.example.demo.DjavidMustafaev.repositories;
 
+import com.example.demo.DjavidMustafaev.model.Category;
 import com.example.demo.DjavidMustafaev.model.Income;
 import io.micrometer.core.annotation.Timed;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,5 +20,8 @@ public interface IncomeRepository extends JpaRepository<Income, Long> {
     @Query("select cast(coalesce(sum(i.amount), 0) as java.math.BigDecimal) " +
             "from Income i where i.date >= :start and i.date <= :end")
     BigDecimal sumAmountBetween(LocalDate start, LocalDate end);
+    // фильтрация по категориям
+    @Query("select i from Income i join fetch i.category where i.category = :category")
+    List<Income> findIncomeByCategory(@Param("category") Category category);
 
 }

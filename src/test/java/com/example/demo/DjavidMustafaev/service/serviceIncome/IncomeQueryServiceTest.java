@@ -1,8 +1,11 @@
 package com.example.demo.DjavidMustafaev.service.serviceIncome;
 
+import com.example.demo.DjavidMustafaev.dto.CategoryDto;
 import com.example.demo.DjavidMustafaev.dto.IncomeDto;
 import com.example.demo.DjavidMustafaev.mapper.IncomeExpenseMapper;
+import com.example.demo.DjavidMustafaev.model.Category;
 import com.example.demo.DjavidMustafaev.model.Income;
+import com.example.demo.DjavidMustafaev.repositories.CategoryRepository;
 import com.example.demo.DjavidMustafaev.repositories.IncomeRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,8 +16,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +31,9 @@ class IncomeQueryServiceTest {
 
     @Mock
     private IncomeExpenseMapper mapper;
+
+    @Mock
+    private CategoryRepository categoryRepository;
 
     @InjectMocks
     private IncomeQueryService service;
@@ -56,5 +64,31 @@ class IncomeQueryServiceTest {
         BigDecimal result = service.totalForYearMonth(2024, 3);
 
         assertEquals(BigDecimal.valueOf(100), result);
+    }
+
+    @Test
+    void listByCategory_shouldReturnMappedDtos() {
+        CategoryDto categoryDto = CategoryDto.builder().name("Зарплата").build();
+        Category category = new Category();
+        Income income = new Income();
+        IncomeDto dto = new IncomeDto();
+
+        when(categoryRepository.findByName("Зарплата")).thenReturn(Optional.of(category));
+        when(incomeRepository.findIncomeByCategory(category)).thenReturn(List.of(income));
+        when(mapper.toIncomeDto(income)).thenReturn(dto);
+
+        List<IncomeDto> result = service.list(categoryDto);
+
+        assertEquals(1, result.size());
+        assertEquals(dto, result.get(0));
+    }
+
+    @Test
+    void listByCategory_shouldThrow_whenCategoryNotFound() {
+        CategoryDto categoryDto = CategoryDto.builder().name("Несуществующая").build();
+
+        when(categoryRepository.findByName("Несуществующая")).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> service.list(categoryDto));
     }
 }

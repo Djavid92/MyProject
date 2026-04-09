@@ -1,7 +1,10 @@
 package com.example.demo.DjavidMustafaev.service.serviceIncome;
 
+import com.example.demo.DjavidMustafaev.dto.CategoryDto;
 import com.example.demo.DjavidMustafaev.dto.IncomeDto;
 import com.example.demo.DjavidMustafaev.mapper.IncomeExpenseMapper;
+import com.example.demo.DjavidMustafaev.model.Category;
+import com.example.demo.DjavidMustafaev.repositories.CategoryRepository;
 import com.example.demo.DjavidMustafaev.repositories.IncomeRepository;
 import com.example.demo.DjavidMustafaev.service.MonthlyTotalCalculator;
 import com.example.demo.DjavidMustafaev.util.Util;
@@ -19,13 +22,15 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class IncomeQueryService implements MonthlyTotalCalculator {
+public class IncomeQueryService implements MonthlyTotalCalculator <IncomeDto> {
     public static final String CACHEABLE_INCOMES_VALUE = "incomes";
+    public static final String CACHEABLE_INCOMES_CATEGORY_VALUE = "incomesCategoryValue";
     public static final String CACHEABLE_INCOMES_TOTAL_FOR_YEAR_MONTH_VALUE = "incomeTotalForYearMonth";
     public static final String CACHEABLE_INCOMES_TOTAL_FOR_CURRENT_MONTH_VALUE = "incomeTotalForCurrentMonth";
 
     private final IncomeRepository incomeRepository;
     private final IncomeExpenseMapper incomeExpenseMapper;
+    private final CategoryRepository categoryRepository;
 
     @Lazy
     @Autowired
@@ -33,10 +38,22 @@ public class IncomeQueryService implements MonthlyTotalCalculator {
 
     // лист доходов за выбранный период
     @Cacheable(value = CACHEABLE_INCOMES_VALUE, key = "#startDate + '::' + #endDate")
+    @Override
     public List<IncomeDto> list(LocalDate startDate, LocalDate endDate) {
         return incomeRepository.findIncomesByDateRange(startDate, endDate).stream()
                 .map(incomeExpenseMapper::toIncomeDto).toList();
 
+    }
+
+    // лист доходов по категориям
+    @Cacheable(value = CACHEABLE_INCOMES_CATEGORY_VALUE, key = "#categoryDto.name")
+    @Override
+    public List<IncomeDto> list(CategoryDto categoryDto) {
+        Category category = categoryRepository.findByName(categoryDto.getName())
+                .orElseThrow(() -> new RuntimeException("Категория не найдена"));
+
+        return incomeRepository.findIncomeByCategory(category).stream()
+                .map(incomeExpenseMapper::toIncomeDto).toList();
     }
 
     // сумма доходов за конкретный месяц

@@ -9,7 +9,7 @@ const fmt = (n) =>
 const fmtDate = (d) =>
   new Date(d).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })
 
-export default function TransactionTable({ type, items, onDelete, onEdit, loading, page }) {
+export default function TransactionTable({ type, items, categories, activeCategoryFilter, onCategoryFilter, onDelete, onEdit, loading, page }) {
   const isIncome   = type === 'income'
   const label      = isIncome ? 'Доходы' : 'Расходы'
   const colorClass = isIncome ? 'text-income' : 'text-expense'
@@ -28,9 +28,10 @@ export default function TransactionTable({ type, items, onDelete, onEdit, loadin
       <div className="flex items-center gap-2 mb-4">
         <i className={`fa-solid ${icon} ${colorClass}`} />
         <h3 className={`text-sm font-semibold uppercase tracking-wide ${colorClass}`}>{label}</h3>
-        <span className="ml-auto text-xs text-muted bg-secondary/10 px-2 py-0.5 rounded-full">
+        <span className="text-xs text-muted bg-secondary/10 px-2 py-0.5 rounded-full">
           {items?.length ?? 0} записей
         </span>
+
       </div>
 
       {loading ? (

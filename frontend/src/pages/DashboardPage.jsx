@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import {
   getTotalsByMonth, getOperationsByMonth,
   getCategories, addCategory, deleteCategory,
   addIncome, updateIncome, deleteIncome,
   addExpense, updateExpense, deleteExpense,
+  getOperationsByIncomeCategory, getOperationsByExpenseCategory,
 } from '../api/financeApi.js'
 
 import StatsCards         from '../components/dashboard/StatsCards.jsx'
@@ -37,6 +38,14 @@ export default function DashboardPage() {
   const [activeTab, setTab]       = useState('income') // 'income' | 'expense' | 'categories'
   const [page, setPage]           = useState(1)
 
+  const [catDropdownOpen, setCatDropdownOpen] = useState(false)
+  const catDropdownRef = useRef(null)
+
+  const [incomeFilter, setIncomeFilter]         = useState(null)  // active category name or null
+  const [expenseFilter, setExpenseFilter]       = useState(null)
+  const [filteredIncomes, setFilteredIncomes]   = useState(null)
+  const [filteredExpenses, setFilteredExpenses] = useState(null)
+
   // ── Fetch data ────────────────────────────────────────────────────────────
   const fetchOps = useCallback(async () => {
     setLoadingOps(true)
@@ -49,6 +58,10 @@ export default function DashboardPage() {
       setIncomes(ops.incomes ?? [])
       setExpenses(ops.expenses ?? [])
       setPage(1)
+      setIncomeFilter(null)
+      setFilteredIncomes(null)
+      setExpenseFilter(null)
+      setFilteredExpenses(null)
     } catch {
       notify('Не удалось загрузить данные', 'error')
     } finally {
@@ -69,6 +82,16 @@ export default function DashboardPage() {
 
   useEffect(() => { fetchOps() }, [fetchOps])
   useEffect(() => { fetchCats() }, [fetchCats])
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (catDropdownRef.current && !catDropdownRef.current.contains(e.target)) {
+        setCatDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleAddIncome = async (dto) => {
@@ -117,6 +140,40 @@ export default function DashboardPage() {
     fetchOps()
   }
 
+  const handleFilterIncomeCategory = async (categoryName) => {
+    if (categoryName === null) {
+      setIncomeFilter(null)
+      setFilteredIncomes(null)
+      setPage(1)
+      return
+    }
+    try {
+      const data = await getOperationsByIncomeCategory(categoryName)
+      setFilteredIncomes(data)
+      setIncomeFilter(categoryName)
+      setPage(1)
+    } catch {
+      notify('Не удалось загрузить данные', 'error')
+    }
+  }
+
+  const handleFilterExpenseCategory = async (categoryName) => {
+    if (categoryName === null) {
+      setExpenseFilter(null)
+      setFilteredExpenses(null)
+      setPage(1)
+      return
+    }
+    try {
+      const data = await getOperationsByExpenseCategory(categoryName)
+      setFilteredExpenses(data)
+      setExpenseFilter(categoryName)
+      setPage(1)
+    } catch {
+      notify('Не удалось загрузить данные', 'error')
+    }
+  }
+
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
@@ -134,6 +191,61 @@ export default function DashboardPage() {
             month={period.month}
             onChange={(y, m) => setPeriod({ year: y, month: m })}
           />
+
+          {/* Category filter — visible only on income/expense tabs */}
+          {(activeTab === 'income' || activeTab === 'expense') && categories.length > 0 && (
+            <div className="relative" ref={catDropdownRef}>
+              {(() => {
+                const isIncome       = activeTab === 'income'
+                const activeFilter   = isIncome ? incomeFilter : expenseFilter
+                const onFilter       = isIncome ? handleFilterIncomeCategory : handleFilterExpenseCategory
+                const activeBg       = isIncome ? 'bg-income' : 'bg-expense'
+                return (
+                  <>
+                    <button
+                      onClick={() => setCatDropdownOpen(v => !v)}
+                      className={`inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2.5 rounded-2xl shadow-sm transition-all
+                        ${activeFilter
+                          ? `${activeBg} text-white hover:brightness-105`
+                          : 'bg-surface border border-secondary/25 text-primary hover:border-secondary/50'
+                        }`}
+                    >
+                      <i className="fa-solid fa-filter text-xs" />
+                      {activeFilter ?? 'Категория'}
+                      <i className={`fa-solid fa-chevron-down text-xs transition-transform ${catDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {catDropdownOpen && (
+                      <div className="absolute right-0 top-full mt-1 z-20 min-w-[160px] bg-surface border border-secondary/20 rounded-xl shadow-lg flex flex-col overflow-hidden">
+                        <button
+                          onClick={() => { onFilter(null); setCatDropdownOpen(false) }}
+                          className={`shrink-0 w-full text-left text-xs px-3 py-2 transition-colors border-b border-secondary/10
+                            ${!activeFilter ? `${activeBg} text-white` : 'text-primary hover:bg-secondary/10'}`}
+                        >
+                          Все категории
+                        </button>
+                        <div className="overflow-y-auto max-h-48">
+                          {categories.map(cat => (
+                            <button
+                              key={cat.id}
+                              onClick={() => { onFilter(cat.name); setCatDropdownOpen(false) }}
+                              className={`w-full text-left text-xs px-3 py-2 transition-colors
+                                ${activeFilter === cat.name
+                                  ? `${activeBg} text-white`
+                                  : 'text-primary hover:bg-secondary/10'
+                                }`}
+                            >
+                              {cat.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )
+              })()}
+            </div>
+          )}
           <button
             onClick={() => setModal('income')}
             className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-2xl
@@ -243,7 +355,10 @@ export default function DashboardPage() {
           {activeTab === 'income' && (
             <TransactionTable
               type="income"
-              items={incomes}
+              items={filteredIncomes ?? incomes}
+              categories={categories}
+              activeCategoryFilter={incomeFilter}
+              onCategoryFilter={handleFilterIncomeCategory}
               onDelete={handleDeleteIncome}
               onEdit={(item) => setEditItem({ type: 'income', item })}
               loading={loadingOps}
@@ -253,7 +368,10 @@ export default function DashboardPage() {
           {activeTab === 'expense' && (
             <TransactionTable
               type="expense"
-              items={expenses}
+              items={filteredExpenses ?? expenses}
+              categories={categories}
+              activeCategoryFilter={expenseFilter}
+              onCategoryFilter={handleFilterExpenseCategory}
               onDelete={handleDeleteExpense}
               onEdit={(item) => setEditItem({ type: 'expense', item })}
               loading={loadingOps}

@@ -1,5 +1,6 @@
 package com.example.demo.DjavidMustafaev.service.serviceIncome;
 
+import com.example.demo.DjavidMustafaev.dto.CategoryDto;
 import com.example.demo.DjavidMustafaev.dto.IncomeDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,14 @@ public class FinanceFacadeIncome {
     private final IncomeCommandService incomeCmd;
     private final IncomeQueryService incomeQuery;
 
-    // лист дохода полностью
+    // лист дохода по месяцам
     public List<IncomeDto> listIncome(LocalDate startDate, LocalDate endDate) {
         return incomeQuery.list(startDate, endDate);
+    }
+
+    // лист доходов по категориям
+    public List<IncomeDto> listIncome(CategoryDto categoryDto) {
+        return incomeQuery.list(categoryDto);
     }
 
     // сумма дохода за произвольный месяц

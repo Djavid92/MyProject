@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -38,6 +39,10 @@ public class FinanceController {
     private final FinanceFacadeExpense financeFacadeExpense;
     private final CategoryService categoryService;
 
+    @Operation(
+            summary = "Выполняет функцию калькулятора",
+            description = "Принимает список чисел и оператор действия, затем выполняет это действие над числами"
+    )
     @GetMapping("/calculate")
     public ResponseEntity<BigDecimal> calculate(@RequestParam List<BigDecimal> numbers,
                                                 @RequestParam char operator) {
@@ -91,6 +96,18 @@ public class FinanceController {
         response.put("startDate", mapDate.get("startDate").toString());
         response.put("endDate", mapDate.get("endDate").toString());
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/operations/by-categoryIncome") // операции по категориям
+    public ResponseEntity<List<IncomeDto>> getOperationByIncomeCategory (@ModelAttribute CategoryDto categoryDto) {
+        List<IncomeDto> listIncome = financeFacadeIncome.listIncome(categoryDto);
+        return ResponseEntity.ok(listIncome);
+    }
+
+    @GetMapping("/operations/by-categoryExpense") // операции по категориям
+    public ResponseEntity<List<ExpenseDto>> getOperationByExpenseCategory (@ModelAttribute CategoryDto categoryDto) {
+        List<ExpenseDto> listExpense = financeFacadeExpense.listExpenses(categoryDto);
+        return ResponseEntity.ok(listExpense);
     }
 
 

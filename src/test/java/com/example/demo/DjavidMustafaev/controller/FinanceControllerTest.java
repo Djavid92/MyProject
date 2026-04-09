@@ -66,8 +66,7 @@ class FinanceControllerTest {
     @Test
     void calculate_shouldReturnSum() throws Exception {
         mockMvc.perform(get("/api/dashboard/calculate")
-                        .param("first", "100")
-                        .param("second", "50")
+                        .param("numbers", "100", "50")
                         .param("operator", "+"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("150"));
@@ -76,8 +75,7 @@ class FinanceControllerTest {
     @Test
     void calculate_shouldReturnDifference() throws Exception {
         mockMvc.perform(get("/api/dashboard/calculate")
-                        .param("first", "100")
-                        .param("second", "50")
+                        .param("numbers", "100", "50")
                         .param("operator", "-"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("50"));
@@ -86,8 +84,7 @@ class FinanceControllerTest {
     @Test
     void calculate_shouldReturnProduct() throws Exception {
         mockMvc.perform(get("/api/dashboard/calculate")
-                        .param("first", "10")
-                        .param("second", "5")
+                        .param("numbers", "10", "5")
                         .param("operator", "*"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("50"));
@@ -96,8 +93,7 @@ class FinanceControllerTest {
     @Test
     void calculate_shouldReturnQuotient() throws Exception {
         mockMvc.perform(get("/api/dashboard/calculate")
-                        .param("first", "100")
-                        .param("second", "4")
+                        .param("numbers", "100", "4")
                         .param("operator", "/"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("25.00"));
@@ -106,8 +102,7 @@ class FinanceControllerTest {
     @Test
     void calculate_shouldReturn400_onDivisionByZero() throws Exception {
         mockMvc.perform(get("/api/dashboard/calculate")
-                        .param("first", "100")
-                        .param("second", "0")
+                        .param("numbers", "100", "0")
                         .param("operator", "/"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Деление на ноль"));
@@ -116,8 +111,7 @@ class FinanceControllerTest {
     @Test
     void calculate_shouldReturn400_onUnknownOperator() throws Exception {
         mockMvc.perform(get("/api/dashboard/calculate")
-                        .param("first", "100")
-                        .param("second", "50")
+                        .param("numbers", "100", "50")
                         .param("operator", "%"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").exists());
@@ -153,6 +147,54 @@ class FinanceControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.income").value(2000))
                 .andExpect(jsonPath("$.expense").value(800));
+    }
+
+    // 🔹 3a. GET /operations/by-categoryIncome
+
+    @Test
+    void getOperationByIncomeCategory_shouldReturnList() throws Exception {
+        List<IncomeDto> incomes = List.of(new IncomeDto());
+
+        when(incomeService.listIncome(any(CategoryDto.class))).thenReturn(incomes);
+
+        mockMvc.perform(get("/api/dashboard/operations/by-categoryIncome")
+                        .param("name", "Зарплата"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void getOperationByIncomeCategory_shouldReturnEmptyList_whenNoOperations() throws Exception {
+        when(incomeService.listIncome(any(CategoryDto.class))).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/dashboard/operations/by-categoryIncome")
+                        .param("name", "Зарплата"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    // 🔹 3b. GET /operations/by-categoryExpense
+
+    @Test
+    void getOperationByExpenseCategory_shouldReturnList() throws Exception {
+        List<ExpenseDto> expenses = List.of(new ExpenseDto());
+
+        when(expenseService.listExpenses(any(CategoryDto.class))).thenReturn(expenses);
+
+        mockMvc.perform(get("/api/dashboard/operations/by-categoryExpense")
+                        .param("name", "Продукты"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void getOperationByExpenseCategory_shouldReturnEmptyList_whenNoOperations() throws Exception {
+        when(expenseService.listExpenses(any(CategoryDto.class))).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/dashboard/operations/by-categoryExpense")
+                        .param("name", "Продукты"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
     }
 
     // 🔹 3. GET /operations/by-month

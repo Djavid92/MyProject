@@ -1,6 +1,58 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Modal from '../ui/Modal.jsx'
 import CalculatorModal from './CalculatorModal.jsx'
+
+function CategorySelect({ categories, value, onChange }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  const openUp = categories.length < 10
+
+  const selected = categories.find(c => String(c.id) === String(value))
+  const label = selected ? selected.name : '— без категории —'
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  const pick = (val) => { onChange(val); setOpen(false) }
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        className="input w-full flex items-center justify-between text-left pr-7"
+      >
+        <span className={selected ? '' : 'text-muted'}>{label}</span>
+        <i className={`fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-muted text-xs transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <ul className={`absolute z-50 w-full bg-surface border border-border rounded-xl shadow-lg overflow-y-auto max-h-48 ${openUp ? 'bottom-full mb-1' : 'top-full mt-1'}`}>
+          <li
+            className="px-3 py-2 text-sm text-muted cursor-pointer hover:bg-secondary/20 rounded-t-xl"
+            onClick={() => pick('')}
+          >
+            — без категории —
+          </li>
+          {categories.map(c => (
+            <li
+              key={c.id}
+              className={`px-3 py-2 text-sm cursor-pointer hover:bg-secondary/20 last:rounded-b-xl ${String(c.id) === String(value) ? 'text-primary font-medium' : ''}`}
+              onClick={() => pick(String(c.id))}
+            >
+              {c.name}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
 
 const today = () => new Date().toISOString().split('T')[0]
 
@@ -151,19 +203,11 @@ export default function AddTransactionModal({ type, open, onClose, categories, o
                 {showNewCat ? 'Отмена' : 'Новая'}
               </button>
             </div>
-            <div className="relative">
-              <select
-                value={form.categoryId}
-                onChange={e => set('categoryId', e.target.value)}
-                className="input appearance-none pr-7"
-              >
-                <option value="">— без категории —</option>
-                {categories.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-              <i className="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-muted text-xs pointer-events-none" />
-            </div>
+            <CategorySelect
+              categories={categories}
+              value={form.categoryId}
+              onChange={val => set('categoryId', val)}
+            />
           </div>
         </div>
 

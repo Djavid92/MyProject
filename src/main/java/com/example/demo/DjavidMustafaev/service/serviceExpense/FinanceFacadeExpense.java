@@ -1,5 +1,6 @@
 package com.example.demo.DjavidMustafaev.service.serviceExpense;
 
+import com.example.demo.DjavidMustafaev.dto.CategoryDto;
 import com.example.demo.DjavidMustafaev.dto.ExpenseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,11 @@ public class FinanceFacadeExpense {
     // лист расхода полностью
     public List<ExpenseDto> listExpenses(LocalDate startDate, LocalDate endDate) {
         return expenseQuery.list(startDate, endDate);
+    }
+
+    // лист расхода по категориям
+    public List<ExpenseDto> listExpenses(CategoryDto categoryDto) {
+        return expenseQuery.list(categoryDto);
     }
 
     // сумма расхода за произвольный месяц

@@ -45,6 +45,13 @@ export const calculate = (numbers, operator) =>
     }
   }).then(r => r.data)
 
+// ── Category filters ───────────────────────────────────────────────────────
+export const getOperationsByIncomeCategory = (name) =>
+  api.get('/operations/by-categoryIncome', { params: { name } }).then(r => r.data)
+
+export const getOperationsByExpenseCategory = (name) =>
+  api.get('/operations/by-categoryExpense', { params: { name } }).then(r => r.data)
+
 // ── Categories ─────────────────────────────────────────────────────────────
 export const getCategories = () =>
   api.get('/categories').then(r => r.data)

@@ -1,7 +1,10 @@
 package com.example.demo.DjavidMustafaev.service.serviceExpense;
 
+import com.example.demo.DjavidMustafaev.dto.CategoryDto;
 import com.example.demo.DjavidMustafaev.dto.ExpenseDto;
 import com.example.demo.DjavidMustafaev.mapper.IncomeExpenseMapper;
+import com.example.demo.DjavidMustafaev.model.Category;
+import com.example.demo.DjavidMustafaev.repositories.CategoryRepository;
 import com.example.demo.DjavidMustafaev.repositories.ExpenseRepository;
 import com.example.demo.DjavidMustafaev.service.MonthlyTotalCalculator;
 import lombok.RequiredArgsConstructor;
@@ -19,22 +22,36 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ExpenseQueryService implements MonthlyTotalCalculator {
+public class ExpenseQueryService implements MonthlyTotalCalculator <ExpenseDto> {
     public static final String CACHEABLE_EXPENSES_VALUE = "expenses";
+    public static final String CACHEABLE_EXPENSES_CATEGORY_VALUE = "expenseCategoryValue";
     public static final String CACHEABLE_EXPENSES_TOTAL_FOR_YEAR_MONTH_VALUE = "expenseTotalForYearMonth";
     public static final String CACHEABLE_EXPENSES_TOTAL_FOR_CURRENT_MONTH_VALUE = "expenseTotalForCurrentMonth";
 
     private final ExpenseRepository expenseRepository;
     private final IncomeExpenseMapper incomeExpenseMapper;
+    private final CategoryRepository categoryRepository;
 
     @Lazy
     @Autowired
-    private ExpenseQueryService expenseQueryService; // self injection
+    private ExpenseQueryService expenseQueryService;
 
     // лист расходов за выбранный период
     @Cacheable(value = CACHEABLE_EXPENSES_VALUE, key = "#startDate + '::' + #endDate")
+    @Override
     public List<ExpenseDto> list(LocalDate startDate, LocalDate endDate) {
         return expenseRepository.findExpenseByDateRange(startDate, endDate).stream()
+                .map(incomeExpenseMapper::toExpenseDto).toList();
+    }
+
+    // лист доходов по категориям
+    @Cacheable(value = CACHEABLE_EXPENSES_CATEGORY_VALUE, key = "#categoryDto.name")
+    @Override
+    public List<ExpenseDto> list(CategoryDto categoryDto) {
+        Category category = categoryRepository.findByName(categoryDto.getName())
+                .orElseThrow(() -> new RuntimeException("Категория не найдена"));
+
+        return expenseRepository.findIncomeByCategory(category).stream()
                 .map(incomeExpenseMapper::toExpenseDto).toList();
     }
 
