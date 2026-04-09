@@ -1,0 +1,96 @@
+package djavidmustafaev.io.financetracker.service.serviceIncome;
+
+import djavidmustafaev.io.financetracker.dto.IncomeDto;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class FinanceFacadeIncomeTest {
+
+    @Mock
+    private IncomeCommandService incomeCmd;
+
+    @Mock
+    private IncomeQueryService incomeQuery;
+
+    @InjectMocks
+    private FinanceFacadeIncome facade;
+
+    @Test
+    void listIncome_shouldDelegateToQueryService() {
+        LocalDate start = LocalDate.now().minusDays(10);
+        LocalDate end = LocalDate.now();
+
+        List<IncomeDto> expected = List.of(new IncomeDto());
+        when(incomeQuery.list(start, end)).thenReturn(expected);
+
+        List<IncomeDto> result = facade.listIncome(start, end);
+
+        assertEquals(expected, result);
+        verify(incomeQuery).list(start, end);
+    }
+
+    @Test
+    void totalIncomesFor_shouldDelegate() {
+        when(incomeQuery.totalForYearMonth(2024, 3))
+                .thenReturn(BigDecimal.TEN);
+
+        BigDecimal result = facade.totalIncomesFor(2024, 3);
+
+        assertEquals(BigDecimal.TEN, result);
+        verify(incomeQuery).totalForYearMonth(2024, 3);
+    }
+
+    @Test
+    void totalIncomeForCurrentMonth_shouldDelegate() {
+        when(incomeQuery.totalForCurrentMonth()).thenReturn(BigDecimal.valueOf(3500));
+
+        BigDecimal result = facade.totalIncomeForCurrentMonth();
+
+        assertEquals(BigDecimal.valueOf(3500), result);
+        verify(incomeQuery).totalForCurrentMonth();
+    }
+
+    @Test
+    void addIncome_shouldCallCommandService() {
+        IncomeDto dto = new IncomeDto();
+
+        facade.addIncome(dto);
+
+        verify(incomeCmd).save(dto);
+    }
+
+    @Test
+    void updateIncome_shouldReturnResultFromCommand() {
+        IncomeDto dto = new IncomeDto();
+        when(incomeCmd.update(1L, dto)).thenReturn(true);
+
+        boolean result = facade.updateIncome(1L, dto);
+
+        assertTrue(result);
+        verify(incomeCmd).update(1L, dto);
+    }
+
+    @Test
+    void deleteIncome_shouldReturnResultFromCommand() {
+        when(incomeCmd.delete(1L)).thenReturn(true);
+
+        boolean result = facade.deleteIncome(1L);
+
+        assertTrue(result);
+        verify(incomeCmd).delete(1L);
+    }
+
+}

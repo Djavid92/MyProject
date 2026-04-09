@@ -4,4 +4,4 @@ spring:
 logging:
   level:
     root: INFO
-    com.example: DEBUG
+    djavidmustafaev.io: DEBUG
