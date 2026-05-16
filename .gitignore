@@ -39,8 +39,8 @@ build/
 ### Project ###
 backups/
 
-### Claude worktrees ###
-**/.claude/worktrees/
+### Claude ###
+.claude/
 
 ### Node ###
 node_modules/
